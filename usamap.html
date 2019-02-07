@@ -7,21 +7,16 @@
 		<link rel="stylesheet" href="usamap.css">
 	</head>
 	<body>
-    <div id="floating-panel">
-      <input id="origin-input" class="controls" id="controls" type="text" placeholder="Enter origin zip">
-      <input id="destination-input" class="controls" type="text" placeholder="Enter destination zip">
-      <div id="job-type-selector" class="controls">
-        <input type="radio" name="type" id="setjobtype-base" checked="checked">
-        <label for="setjobtype-base">Base</label>
-        <input type="radio" name="type" id="setjobtype-after" checked="checked">
-        <label for="setjobtype-after">After hours</label>
-        <input type="radio" name="type" id="setjobtype-hold" checked="checked">
-        <label for="setjobtype-hold">Hold</label>
-      </div>
-      <div id="output"></div>
+    <input id="origin-input" class="controls" id="controls" type="text" placeholder="Enter origin zip" onchange="getMatrix();">
+    <input id="destination-input" class="controls" type="text" placeholder="Enter destination zip" onchange="getMatrix();">
+    <div id="job-type-selector" class="controls">
+      <input type="radio" name="type" id="setjobtype-base" checked="checked">
+      <label for="setjobtype-base">Base</label>
+      <input type="radio" name="type" id="setjobtype-after" checked="checked">
+      <label for="setjobtype-after">After hours</label>
+      <input type="radio" name="type" id="setjobtype-hold" checked="checked">
+      <label for="setjobtype-hold">Hold</label>
     </div>
-  		
-
 		<div id="map"></div>
 		<script src ="scripts/usamap.js"></script>
 		<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA8DR4DrQpMFw1hTo-t51l_-TVtgf_18Js&libraries=places&callback=initMap" type="text/javascript"></script>

@@ -11,38 +11,27 @@ function initMap() {
 	});
 	var directionsService = new google.maps.DirectionsService;
 	var directionsDisplay = new google.maps.DirectionsRenderer;
-	var placeService = new google.maps.places.PlacesService(map);
 	var distanceMatrixService = new google.maps.DistanceMatrixService();
-	directionsDisplay.setMap(map);
+	
 	var originInput = document.getElementById('origin-input');
 	var destinationInput = document.getElementById('destination-input');
-	var jobTypeSelector = document.getElementById('job-type-selector');
-	var zipTest = '02111, USA';
-	infowindow = new google.maps.InfoWindow();
+	var jobTypeSelector = document.getElementById('job-type-selector');	
+	map.controls[google.maps.ControlPosition.TOP_LEFT].push(originInput);
+  	map.controls[google.maps.ControlPosition.TOP_LEFT].push(destinationInput);
+  	map.controls[google.maps.ControlPosition.TOP_LEFT].push(jobTypeSelector);
 
-	var request = {
-		query: '02111',
-		fields: ['name', 'geometry'],
-	}
-	
-	placeService.findPlaceFromQuery(request, function(results, status) {
-	    if (status === google.maps.places.PlacesServiceStatus.OK) {
-	      for (var i = 0; i < results.length; i++) {
-	        createMarker(results[i]);
-	      }
-	      map.setCenter(results[0].geometry.location);
-	    }
-	  });
-	var origin = new google.maps.LatLng(42.3477835,-71.1937272);
-	var destination = new google.maps.LatLng(42.3438975,-71.1958222);
+	directionsDisplay.setMap(map);
+	infowindow = new google.maps.InfoWindow();
+	var origin = originInput.innerHTML;
+	var destination = destinationInput.innerHTML;
 	var destinationIcon = 'https://chart.googleapis.com/chart?' +
             'chst=d_map_pin_letter&chld=D|FF0000|000000';
     var originIcon = 'https://chart.googleapis.com/chart?' +
-        'chst=d_map_pin_letter&chld=O|FFFF00|000000';	
-
-	distanceMatrixService.getDistanceMatrix({
-		origins: ['02111'],
-		destinations: ['02459'],
+        'chst=d_map_pin_letter&chld=O|FFFF00|000000';
+  	function getMatrix(){
+  		distanceMatrixService.getDistanceMatrix({
+		origins: [origin],
+		destinations: [destination],
 		travelMode: 'DRIVING'
 	}, function(response, status) {
 		if (status !== 'OK') {
@@ -57,6 +46,7 @@ function initMap() {
 				var icon = asDestination ? destinationIcon : originIcon;
 				return function(results, status) {
 					if (status === 'OK') {
+						alert(results[0]);
 						markersArray.push(new google.maps.Marker({
 							map: map,
 							position: results[0].geometry.location,
@@ -67,7 +57,6 @@ function initMap() {
 					}
 				};
 			};
-
 			for (var i = 0; i < originList.length; i++) {
 				var results = response.rows[i].elements;
 				geocoder.geocode({'address': originList[i]},
@@ -82,6 +71,7 @@ function initMap() {
 			}
 		}
 	});
+	}
 	map.data.setStyle(styleFeature);
 }
 function createMarker(place) {
@@ -112,7 +102,6 @@ function styleFeature(feature) {
 var script = document.createElement('script');
 script.src = 'https://smcf.io/couriers.js';
 document.getElementsByTagName('head')[0].appendChild(script);
-
 window.eqfeed_callback = function(data) {
 	map.data.addGeoJson(data);
 }
