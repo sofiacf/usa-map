@@ -52,3 +52,18 @@ padding-left: 10px;
 	font-size: 13px;
 	font-weight: 300;
 }
+#info-panel {
+	background-color: #fff;
+	font-family: 'Roboto', 'sans-serif';
+	line-height: 30px;
+	margin-left: 12px;
+	padding: 0 11px 0 13px;
+	background-color: #fff;
+	margin: 20px;
+    border-width: 2px;
+    width: 20%;
+    height: 60px;
+    float: left;
+    text-align: left;
+    padding-top: 0;
+}
