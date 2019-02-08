@@ -58,8 +58,9 @@ function calculateAndDisplayRoute(directionsService, directionsDisplay) {
   			document.getElementById('info-panel').style.display = "inline";
   			directionsDisplay.setDirections(result);
   			var distance = parseInt(result.routes[0].legs[0].distance.text);
+  			var quote = (distance*2.25) + 45;
   			document.getElementById('mileage').innerHTML = distance + " mi";
-  			document.getElementById('quote').innerHTML = 45 + (distance * 2.25);
+  			document.getElementById('quote').innerHTML = "$" + quote;
   			
   		}
   	})
