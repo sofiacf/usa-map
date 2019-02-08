@@ -100,7 +100,7 @@ function styleFeature(feature) {
 	};
 }
 var script = document.createElement('script');
-script.src = 'https://smcf.io/couriers.js';
+script.src = 'https://smcf.io/scripts/couriers.js';
 document.getElementsByTagName('head')[0].appendChild(script);
 window.eqfeed_callback = function(data) {
 	map.data.addGeoJson(data);
