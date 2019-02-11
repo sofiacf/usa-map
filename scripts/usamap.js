@@ -1,4 +1,5 @@
-//Add infowindow for route, display distance
+//Fix quote (distance-15, $3/mi states)
+//Add courier to route
 //Save directions to server, display multiple routes using array of directionsRenderers
 
 var map;
@@ -10,7 +11,7 @@ function initMap() {
 	var mapOptions = {
 		mapTypeControl: false,
 		center: {lat: 39.397, lng: -97.644},
-		zoom: 4.5,
+		zoom: 4,
 		styles: mapStyle
 	}
 	map = new google.maps.Map(document.getElementById('map'), mapOptions);

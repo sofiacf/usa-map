@@ -6,19 +6,6 @@ html, body {
 	margin: 0;
 	padding: 0;
 }
-#floating-panel {
-position: absolute;
-top: 10px;
-left: 25%;
-z-index: 5;
-background-color: #fff;
-padding: 5px;
-border: 1px solid #999;
-text-align: center;
-font-family: 'Roboto','sans-serif';
-line-height: 30px;
-padding-left: 10px;
-}
 .controls {
 	margin-top: 10px;
 	border: 1px solid transparent;
@@ -53,7 +40,6 @@ padding-left: 10px;
 	font-weight: 300;
 }
 #info-panel {
-	background-color: #fff;
 	font-family: 'Roboto', 'sans-serif';
 	line-height: 30px;
 	margin-left: 12px;
@@ -69,6 +55,6 @@ padding-left: 10px;
 }
 #quote,
 #mileage {
-	float: right;
-	float: right;
+	background-color: #fff;
+	text-align: : right;
 }
