@@ -7,21 +7,43 @@
 		<link rel="stylesheet" href="usamap.css">
 	</head>
 	<body>
-    <input id="origin-input" class="controls" id="controls" type="text" placeholder="Enter origin zip">
-    <input id="destination-input" class="controls" type="text" placeholder="Enter destination zip">
-    <div id="job-type-selector" class="controls">
-      <input type="radio" name="type" id="setjobtype-base">
-      <label for="setjobtype-base">Base</label>
-      <input type="radio" name="type" id="setjobtype-after">
-      <label for="setjobtype-after">After hours</label>
-      <input type="radio" name="type" id="setjobtype-hold">
-      <label for="setjobtype-hold">Hold</label>
+    <div id="control-panel">
+      <form id="quote-form" class="controls">
+        <div><b>Generate quote</b></div>
+        <div>
+         <span>P: <input id="origin-input" class="controls" type="text" placeholder="Pickup zip"></span>
+          <span>D: <input id="destination-input" class="controls" type="text" placeholder="Delivery zip"></span>
+        </div>
+        <div id="job-type-selector">
+          <span>
+            <input type="radio" name="type" id="setjobtype-direct" checked="checked">
+            <label for="setjobtype-direct">Direct</label>
+          </span>
+          <span>
+            <input type="radio" name="type" id="setjobtype-hold">
+            <label for="setjobtype-hold">Hold</label>
+          </span>
+          <span>
+            <input type="radio" name="type" id="setjobtype-roundtrip">
+            <label for="setjobtype-roundtrip">Roundtrip</label>
+          </span>
+        </div>
+      </form>
+      <div id="options">Options</div>
     </div>
-		<div id="map"></div>
-    <div id="info-panel" class="controls" id="controls">
-      <div>
-        <div><b>Base mileage: </b><span id="mileage"></span></div>
-        <div><b>Base quote: </b><span id="quote"></span></div>
+    <div id="map"></div>
+    <div id="info-panel" class="controls">
+      <div id="info-panel-labels">
+        <b>
+          <div>Base mileage: </div>
+          <div>Base quote: </div>
+          <div>Courier: </div>
+        </b>
+      </div>
+      <div id="info-panel-info">
+        <div id="mileage"></div>
+        <div id="quote"></div>
+        <div id="courier">Click map to add</div>
       </div>
     </div>
     <script src ="scripts/usamap.js"></script>
