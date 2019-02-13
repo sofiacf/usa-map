@@ -3,13 +3,12 @@
 //Save directions to server, display multiple routes using array of directionsRenderers
 var map;
 var infowindow;
-var needsCourier;
-var courierPlaceId;
-document.getElementById('info-panel').style.display = 'none';
+var courier = false;
+document.getElementById('dispatch-panel').style.display = 'none';
 function initMap() {
 	var directionsService = new google.maps.DirectionsService();
 	var directionsDisplay = new google.maps.DirectionsRenderer();
-	var geocoder = new google.maps.Geocoder(); 
+	var geocoder = new google.maps.Geocoder();
 	var mapOptions = {
 		mapTypeControl: false,
 		center: {lat: 39.397, lng: -97.644},
@@ -18,9 +17,8 @@ function initMap() {
 	}
 	map = new google.maps.Map(document.getElementById('map'), mapOptions);
 	infowindow = new google.maps.InfoWindow();
-	map.controls[google.maps.ControlPosition.TOP_LEFT].push(document.getElementById('control-panel'));
-	var infoPanel = document.getElementById('info-panel');
-  	map.controls[google.maps.ControlPosition.LEFT].push(infoPanel);
+	map.controls[google.maps.ControlPosition.TOP_LEFT].push(document.getElementById('quote-form'));
+  	map.controls[google.maps.ControlPosition.LEFT].push(document.getElementById('dispatch-panel'));
 	directionsDisplay.setMap(map);
 	map.data.setStyle(styleFeature);
 	map.data.addListener('click', function(event) {
@@ -32,69 +30,63 @@ function initMap() {
 		infowindow.setPosition(f.getGeometry().get());
 		infowindow.setOptions({pixelOffset: new google.maps.Size(0, -30)});
 		infowindow.open(map);
-		if (needsCourier){
-			geocoder.geocode({'location': f.getGeometry().get()}, function(results, status){
-				if (status === 'OK') {
-					needsCourier = false;
-					document.getElementById('courier').innerHTML = name;
-					courierPlaceId = results[0].place_id;
-				}
-			})
-			
-		}
+		geocoder.geocode({'location': f.getGeometry().get()}, function(results, status){
+			if (status === 'OK') {
+				document.getElementById('courier').innerHTML = name;
+				courier = results[0].place_id;
+			}
+		});
 	});
 	var onChangeHandler = function() {
-		var testJob = new Delivery();
-		if (needsCourier) {
+		var d = document.getElementById('destination-input').value;
+		if (d) {
+			document.getElementById('dispatch-panel').style.display = 'block';
+			var testJob = new Delivery();
 			testJob.calculateAndDisplayRoute(directionsService, directionsDisplay);
-			document.getElementById('info-panel').style.display = "inline";
-		}
-		if (!needsCourier) {
-			testJob.calculateAndDisplayRoute(directionsService, directionsDisplay);			
 		}
 	}
 	document.getElementById('origin-input').addEventListener('change', onChangeHandler);
 	document.getElementById('destination-input').addEventListener('change', onChangeHandler);
+	document.getElementById('rate').addEventListener('change', onChangeHandler);
+	document.getElementById('add').addEventListener('change', onChangeHandler);
 }
 function Delivery(){
-	needsCourier = true;
 	var pickup = document.getElementById('origin-input').value;
 	var delivery = document.getElementById('destination-input').value;
-	var courier = courierPlaceId;
-	var request = {
-		origin: pickup,
-		destination: delivery,
-		optimizeWaypoints: false,
-		travelMode: 'DRIVING'
-	};
-	var baseEnum = Object.freeze({
-			BASE : 45,
-			AFTER : 65,
-			WEEKEND : 90,
-			D : 95,
-			DAFTER : 120,
-			DHOLD : 180
-		});
-	var distance;
+	var request;
+	var waypoint = Object({location: courier, stopover: true});
+	if (!courier) {
+		request = {origin: pickup, destination: delivery, optimizeWaypoints: false,	travelMode: 'DRIVING'}
+	} else {
+		request = {
+			origin: pickup,
+			destination: delivery,
+			waypoints: [waypoint],
+			optimizeWaypoints: false,
+			travelMode: 'DRIVING'
+		}
+	}
+	var base = parseInt(document.getElementById('rate').value);
+	var add = parseInt(document.getElementById('add').value);
 	function getQuote(distance){
 		if (distance>15) {
-			quote = (distance-15) * 2.25 + 45;
+			quote = (distance-15) * 2.25 + base + add;
 		}
 		else {
-			quote = 45;
+			quote = base + add;
 		}
 		return quote;
 	}
-	var hello;
 	this.calculateAndDisplayRoute = function(directionsService, directionsDisplay) {
 		directionsService.route(request,
 		function(result, status) {
 			if (status == 'OK') {
 				directionsDisplay.setDirections(result);
-				hello = result;
-				distance = parseInt(result.routes[0].legs[0].distance.text);
+				var distance = 0;
+				for (i=0; i<result.routes[0].legs.length; i++){
+					distance += parseInt(result.routes[0].legs[i].distance.text);
+				}
 				quote = getQuote(distance);
-				console.log(hello.geocoded_waypoints[0].place_id);
 				document.getElementById('mileage').innerHTML = distance + " mi";
 				document.getElementById('quote').innerHTML = "$" + quote;				
 			};
@@ -128,4 +120,5 @@ var mapStyle = [{
 	{
 	'featureType': 'landscape',
 	'elementType': 'geometry',
-	'styler:': [{'visibility': 'on'}]}];
+	'styler:': [{'visibility': 'on'}]
+}];

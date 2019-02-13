@@ -14,22 +14,33 @@ html, body {
 	font-family: Roboto;
 	font-size: 13px;
 	font-weight: 300;
-	background-color: rgba(255, 255, 255, 0.8);
+	background-color: rgba(255, 255, 255, 0.85);
 }
-#quote-form {
+.control-panel {
+	box-sizing: border-box;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+	font-family: Roboto;
+	font-size: 13px;
+	font-weight: 300;
+	background-color: rgba(255, 255, 255, 0.85);
+	border: 0;
 	padding: 0;
+	padding-left: 5px;
 	margin-top: 10px;
 	margin-left: 10px;
-	width: 210px;
-	height: 90px;
+	margin-bottom: 10px;
+	width: 225px;
 }
-#quote-form div {
-	width: calc(100% - 5px);
-	margin: 5px 5px 5px 5px;
+.control-panel div {
+	width: calc(100%-5px);
+	margin: 0 5px 5px 5px;
 	text-align: justify;
 }
-#quote-form div span {
+.control-panel div span {
 	display: inline-block;
+}
+#dispatch-panel span {
+	float: right;
 }
 #origin-input,
 #destination-input {
@@ -42,24 +53,4 @@ html, body {
 }
 #job-type-selector input {
 	margin-left: 0;
-}
-#options {
-	padding: 0;
-	margin-left: 10px;
-	width: 210px;
-	height: 90px;
-	text-align: right;
-}
-#info-panel {
-	margin-top: 10px;
-	margin-left: 10px;
-	padding: 5px 5px 5px 5px;
-	width: 154px;
-}
-#info-panel-labels {
-	float: left;
-	font-weight: bold;
-}
-#info-panel-info {
-	float: right;
 }
