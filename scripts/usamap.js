@@ -61,7 +61,7 @@ function Delivery() {
         } else if (!c) {
             return {origin: o, destination: dest, travelMode: "DRIVING"};
         }
-        w = direct.checked ? [p] : hold.checked ? [p, c] : [p, d, p];
+        w = direct.checked ? [p] : hold.checked ? [p, c] : [p, d];
         for (var i = 0; i < w.length; i++) w[i] = {"location": w[i], "stopover": true};
         return {origin: o, destination: dest, travelMode: "DRIVING", waypoints: w};
     }
