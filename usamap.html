@@ -10,8 +10,8 @@
     <form id="quote-form" class="control-panel">
       <div><b>Generate quote</b></div>
       <div>
-       <span>P: <input id="origin-input" class="controls" type="text" placeholder="Pickup zip"></span>
-        <span>D: <input id="destination-input" class="controls" type="text" placeholder="Delivery zip"></span>
+       <span>P: <input id="p-input" class="controls" type="text" placeholder="Pickup zip"></span>
+        <span>D: <input id="d-input" class="controls" type="text" placeholder="Delivery zip"></span>
       </div>
       <div id="job-type-selector">
         <span>
@@ -23,22 +23,24 @@
           <label for="setjobtype-hold">Hold</label>
         </span>
         <span>
-          <input type="radio" name="type" id="setjobtype-roundtrip">
-          <label for="setjobtype-roundtrip">Roundtrip</label>
+          <input type="radio" name="type" id="setjobtype-rt">
+          <label for="setjobtype-rt">Roundtrip</label>
         </span>
       </div>
     </form>
     <div id="map"></div>
     <div id="dispatch-panel" class="control-panel">
       <div>
-        <b>Base mileage: </b>
-        <span id="mileage"></span>
+        <b>Base mileage: </b><span id="mileage"></span>
       </div>
       <div>
         <b>Base quote: </b><span id="quote"></span>
       </div>
       <div>
         <b>Courier: </b><span id="courier">Click map to add</span>
+      </div>
+      <div>
+        <b>$3/mi quote: </b><span id = "higher-quote"></span>
       </div>
       <form>
         <div>

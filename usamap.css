@@ -42,8 +42,8 @@ html, body {
 #dispatch-panel span {
 	float: right;
 }
-#origin-input,
-#destination-input {
+#p-input,
+#d-input {
 	margin: 0 5px 0 5px;
 	width: 75px;
 }
