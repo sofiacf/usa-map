@@ -87,12 +87,12 @@ function Delivery() {
 }
 function styleFeature(feature) {
     var type = feature.getProperty("type"), name = feature.getProperty("Name"),
-    preferredIcon = "https://smcf.io/images/preferred.png",
-    otherIcon = "https://smcf.io/images/other.png";
+    preferredIcon = "images/preferred.png",
+    otherIcon = "images/other.png";
     return {icon: {url: (type == "preferred") ? preferredIcon : otherIcon}};
 }
 var script = document.createElement("script");
-script.src = "https://smcf.io/scripts/couriers.js";
+script.src = "scripts/couriers.js";
 document.getElementsByTagName("head")[0].appendChild(script);
 window.eqfeed_callback = function(data) {
     map.data.addGeoJson(data);
