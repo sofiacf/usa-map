@@ -68,15 +68,18 @@ function Delivery() {
     function getQuote(mi, permile){
         var base = parseInt(document.getElementById("rate").value),
         add = parseInt(document.getElementById("add").value);
-        return (mi>15) ? (mi - 15) * permile + base + add : base + add;
+        return (mi>15) ? ((mi - 15) * permile) + base + add : base + add;
     }
     var request = getRequest();
     this.showRouteAndQuote = function(directionsService, directionsDisplay) {
         directionsService.route(request, function(result, status) {
             if (status !== "OK") return;
             directionsDisplay.setDirections(result);
-            var mi = 0, legs = result.routes[0].legs;
-            for (var i=0; i<legs.length; i++) mi += parseInt(legs[i].distance.text);
+            var mi = 0;
+            var legs = result.routes[0].legs;
+            for (var i=0; i<legs.length; i++) {
+                mi += parseInt(legs[i].distance.value * 0.0006213712);
+            } 
             var quote = getQuote(mi, 2.25);
             var higherQuote = getQuote(mi, 3);
             document.getElementById("mileage").innerHTML = mi + " mi";
