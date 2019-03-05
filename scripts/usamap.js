@@ -1,4 +1,3 @@
-//$3/mi states
 //Cache route, DirectionsRenderers array
 var map, c;
 document.getElementById("dispatch-panel").style.display = "none";
@@ -68,7 +67,7 @@ function Delivery() {
     function getQuote(mi, permile){
         var base = parseInt(document.getElementById("rate").value),
         add = parseInt(document.getElementById("add").value);
-        return (mi>15) ? ((mi - 15) * permile) + base + add : base + add;
+        return (mi>15) ? (mi - 15) * permile + base + add : base + add;
     }
     var request = getRequest();
     this.showRouteAndQuote = function(directionsService, directionsDisplay) {
