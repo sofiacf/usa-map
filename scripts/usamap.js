@@ -46,12 +46,12 @@ function initMap() {
             var notes = markerElem.getAttribute("notes");
             var contact = markerElem.getAttribute("contact");
             var preferredIcon = "images/preferred.png", otherIcon = "images/other.png";
-            var thing = {icon: {url: (grade>3) ? preferredIcon : otherIcon}};
-            var icon = thing;
+            var icon = {url: (grade>3) ? preferredIcon : otherIcon};
             var marker = new google.maps.Marker({
                 map: map,
                 position: point,
-                label: "test"
+                icon: icon,
+                label: name
             });
         });
     });
