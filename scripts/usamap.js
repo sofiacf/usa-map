@@ -5,8 +5,8 @@ function initMap() {
     var mapOptions = {
         mapTypeControl: false,
         center: {lat: 39.397, lng: -97.644},
-        zoom: 4,
-        styles: mapStyle
+        zoom: 4
+        // styles: mapStyle
     };
     map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
@@ -22,15 +22,13 @@ function initMap() {
 
     var file = "scripts/couriers.xml";
     downloadUrl(file, function(data) {
-        console.log(file);
         var xml = data.responseXML;
-        console.log(xml);
         var markers = xml.documentElement.getElementsByTagName("marker");
         Array.prototype.forEach.call(markers, function(markerElem) {
-            var id = markerElem.getAttribute('id');
-            var name = markerElem.getAttribute('name');
+            var id = markerElem.getAttribute("id");
+            var name = markerElem.getAttribute("name");
             var place_id= markerElem.getAttribute("place_id");
-            var point = new google.maps.LatLng(parseFloat(markerElem.getAttribute('lat')), parseFloat(markerElem.getAttribute('lng')));
+            var point = new google.maps.LatLng(parseFloat(markerElem.getAttribute("lat")), parseFloat(markerElem.getAttribute("lng")));
             var city = markerElem.getAttribute("city")
             var state = markerElem.getAttribute("state");
             var grade = parseInt(markerElem.getAttribute("grade"));
@@ -47,24 +45,14 @@ function initMap() {
             var phone2 = markerElem.getAttribute("phone2");
             var notes = markerElem.getAttribute("notes");
             var contact = markerElem.getAttribute("contact");
-            var infowincontent = document.createElement("div");
-            var strong = document.createElement("strong");
-            strong.textContent = name;
-            infowincontent.appendChild(strong);
-            var text = document.createElement('text');
-            text.textContent = phone;
-            infowincontent.appendChild(text);
             var preferredIcon = "images/preferred.png", otherIcon = "images/other.png";
-            var icon = (grade>3) ? {url: preferredIcon, label: name} : {url: otherIcon, label: name};
+            var thing = {icon: {url: (grade>3) ? preferredIcon : otherIcon}};
+            var icon = thing;
             var marker = new google.maps.Marker({
                 map: map,
                 position: point,
-                // label: "test"
-                });
-            // marker.addListener('click', function() {
-            //     infoWindow.setContent(infowincontent);
-            //     infoWindow.open(map, marker);
-            // });
+                label: "test"
+            });
         });
     });
 
@@ -137,7 +125,7 @@ function Delivery() {
 function downloadUrl(url, callback) {
     var request = window.ActiveXObject ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest;
 
-    request.onreadstatechange = function() {
+    request.onreadystatechange = function() {
         if (request.readyState == 4) {
             request.onreadystatechange = doNothing;
             callback(request, request.status);
@@ -150,14 +138,14 @@ function doNothing() {}
 // window.eqfeed_callback = function(data) {
 //     map.data.addGeoJson(data);
 // }
-var mapStyle = [
-    {
-        "featureType": "all",
-        "elementType": "all",
-        "stylers": [{"visibility": "on"}]
-    }, {
-        "featureType": "landscape",
-        "elementType": "geometry",
-        "styler:": [{"visibility": "on"}]
-    }
-];
+// var mapStyle = [
+//     {
+//         "featureType": "all",
+//         "elementType": "all",
+//         "stylers": [{"visibility": "on"}]
+//     }, {
+//         "featureType": "landscape",
+//         "elementType": "geometry",
+//         "styler:": [{"visibility": "on"}]
+//     }
+// ];
