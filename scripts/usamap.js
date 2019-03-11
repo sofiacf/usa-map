@@ -1,12 +1,12 @@
 //Cache route, DirectionsRenderers array
-var map, c, infowindow;
+var map, c, n, infowindow, service, phRequest;
+
 document.getElementById("dispatch-panel").style.display = "none";
 function initMap() {
     var mapOptions = {
         mapTypeControl: false,
         center: {lat: 39.397, lng: -97.644},
         zoom: 4
-        // styles: mapStyle
     };
     map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
@@ -20,76 +20,102 @@ function initMap() {
     map.controls[google.maps.ControlPosition.LEFT].push(dispatchPanel);
     directionsDisplay.setMap(map);
 
-    var file = "scripts/couriers.xml";
-    downloadUrl(file, function(data) {
+    service = new google.maps.places.PlacesService(map);
+
+
+    // service.findPlaceFromQuery(request, function(results, status) {
+    //     if (!status === google.maps.places.PlacesServiceStatus.OK) return;
+    //     for (var i = 0; i < results.length; i++) {
+    //         results[i]
+    //     }
+    // })
+    
+    var preferredIcon = "images/preferred.png", otherIcon = "images/other.png";
+    downloadUrl("scripts/couriers.xml", function(data) {
         var xml = data.responseXML;
         var markers = xml.documentElement.getElementsByTagName("marker");
-        Array.prototype.forEach.call(markers, function(markerElem) {
-            var id = markerElem.getAttribute("id");
-            var name = markerElem.getAttribute("name");
-            var place_id= markerElem.getAttribute("place_id");
-            var point = new google.maps.LatLng(parseFloat(markerElem.getAttribute("lat")), parseFloat(markerElem.getAttribute("lng")));
-            var city = markerElem.getAttribute("city")
-            var state = markerElem.getAttribute("state");
-            var grade = parseInt(markerElem.getAttribute("grade"));
-            var usa = markerElem.getAttribute("usa");
-            var iac = markerElem.getAttribute("iac");
-            var hm = markerElem.getAttribute("hm");
-            var tsa = markerElem.getAttribute("tsa");
-            var nfo = markerElem.getAttribute("tsa");
-            var vehicles = markerElem.getAttribute("vehicles")
-            var phone = markerElem.getAttribute("phone");
-            var fax = markerElem.getAttribute("fax");
-            var account = markerElem.getAttribute("account");
-            var email = markerElem.getAttribute("email");
-            var phone2 = markerElem.getAttribute("phone2");
-            var notes = markerElem.getAttribute("notes");
-            var contact = markerElem.getAttribute("contact");
-            var preferredIcon = "images/preferred.png", otherIcon = "images/other.png";
-            var icon = {url: (grade>3) ? preferredIcon : otherIcon};
+        Array.prototype.forEach.call(markers, function(e) { 
+            var id = e.getAttribute("id"), name = e.getAttribute("name"), acc = e.getAttribute("account"),
+            city = e.getAttribute("city"), st = e.getAttribute("state"),
+            ph = e.getAttribute("phone"),  ph2 = e.getAttribute("phone2"), f = e.getAttribute("fax"),
+            email = e.getAttribute("email"), con = e.getAttribute("contact"), x = e.getAttribute("notes"),
+            gr = parseInt(e.getAttribute("grade")), v = e.getAttribute("vehicles"), usa = e.getAttribute("usa"),
+            iac = e.getAttribute("iac"), hm = e.getAttribute("hm"),
+            tsa = e.getAttribute("tsa"), nfo = e.getAttribute("nfo"),
+            ico = {url: (gr>3) ? preferredIcon : otherIcon},
+            place_id;
+            var point = new google.maps.LatLng(parseFloat(e.getAttribute("lat")), parseFloat(e.getAttribute("lng")));
+
+            var getPlaceId = function(){
+                if (!e.getAttribute("place_id")) {
+                    var phRequest = {phoneNumber: ph, fields: ["place_id"]};
+                    service.findPlaceFromPhoneNumber(phRequest, function(results, status) {
+                        if (!status === google.maps.places.PlacesServiceStatus.OK) return "";
+                        if (!results) return "";
+                        place_id = results[0].place_id;
+                    });
+                }
+                else place_id = e.getAttribute("place_id");
+            }
+            getPlaceId();
+            var getPlaceDetails = function(request) {
+                service.getDetails(request, function(place, status) {
+                    if (!status === google.maps.places.PlacesServiceStatus.OK) {
+                        setTimeout(function() {
+                            getPlaceDetails(request);
+                        }, 200);
+                    }
+                    if (place) if (point !== place.geometry.location) console.log(place_id + " " + place.geometry.location);   
+                    else console.log(name);
+                });
+                if (point) return point;
+            }
+    
+            if (place_id) {
+                var detailsRequest = {placeId: place_id, fields: ["name", "geometry.location"]};
+                point = getPlaceDetails(detailsRequest);
+            }
+            if (place_id) ico = {url: "images/box_full.png"}
             var marker = new google.maps.Marker({
                 map: map,
                 position: point,
-                icon: icon,
+                icon: ico,
                 label: name
+            });
+            marker.addListener("click", function() {
+                infowindow.setContent(`<div><p>${name}</p><p>${ph}</p></div>`);
+                infowindow.setOptions({pixelOffset: new google.maps.Size(0, -30)});
+                infowindow.open(map, marker);
+                document.getElementById("courier").innerHTML = name;
+                document.getElementById("ph").innerHTML = ph;
+                phRequest = {phoneNumber: ph, fields: ["place_id"]}
+                c = point;
+                n = name;
+                if (!place_id) getPlaceId(phRequest, name);
+                onChangeHandler();
             });
         });
     });
-
     var onChangeHandler = function() {
-        if (document.getElementById("d-input").value) {
-            dispatchPanel.style.display = "block";
-            var job = new Delivery();
-            job.showRouteAndQuote(directionsService, directionsDisplay);
-        }
+        if (!document.getElementById("d-input").value) return;
+        dispatchPanel.style.display = "block";
+        var job = new Delivery();
+        job.showRouteAndQuote(directionsService, directionsDisplay);
     }
-    // map.data.addListener("click", function(event) {
-    //     var f = event.feature;
-    //     var name = f.getProperty("Name"),
-    //     description = f.getProperty("description");
-    //     if (!description) description = "Please add details";
-    //     infowindow.setContent(`<div><p>${name}</p><p>${description}</p></div>`);
-    //     infowindow.setPosition(f.getGeometry().get());
-    //     infowindow.setOptions({pixelOffset: new google.maps.Size(0, -30)});
-    //     infowindow.open(map);
-    //     document.getElementById("courier").innerHTML = name;
-    //     c = f.getGeometry().get();
-    //     onChangeHandler();
-    // });
     quoteForm.addEventListener("change", onChangeHandler);
     dispatchPanel.addEventListener("change", onChangeHandler);
 }
 function Delivery() {
     function getRequest() {
-        var o, r, w
+        var o, r, w,
         p = document.getElementById("p-input").value,
         d = document.getElementById("d-input").value,
-        direct = document.getElementById("setjobtype-direct"),
-        hold = document.getElementById("setjobtype-hold"),
-        rt = document.getElementById("setjobtype-rt");
+        direct = document.getElementById("setjobtype-direct").checked,
+        hold = document.getElementById("setjobtype-hold").checked,
+        rt = document.getElementById("setjobtype-rt").checked;
         o = c ? c : p;
-        dest = (rt.checked) ? p : d;
-        if (!c && rt.checked) {
+        dest = (rt) ? p : d;
+        if (!c && rt) {
             w = [{"location": d, "stopover": true}];
             return {origin: o, waypoints: w, destination: dest, travelMode: "DRIVING"};
         } else if (!c) {
@@ -109,13 +135,9 @@ function Delivery() {
         directionsService.route(request, function(result, status) {
             if (status !== "OK") return;
             directionsDisplay.setDirections(result);
-            var mi = 0;
-            var legs = result.routes[0].legs;
-            for (var i=0; i<legs.length; i++) {
-                mi += parseInt(legs[i].distance.value * 0.0006213712);
-            } 
-            var quote = getQuote(mi, 2.25);
-            var higherQuote = getQuote(mi, 3);
+            var mi = 0, legs = result.routes[0].legs;
+            for (var i=0; i<legs.length; i++) mi += parseInt(legs[i].distance.value * 0.0006213712);
+            var quote = getQuote(mi, 2.25), higherQuote = getQuote(mi, 3);
             document.getElementById("mileage").innerHTML = mi + " mi";
             document.getElementById("quote").innerHTML = "$" + quote;
             document.getElementById("higher-quote").innerHTML = "$" + higherQuote;
@@ -124,7 +146,6 @@ function Delivery() {
 }
 function downloadUrl(url, callback) {
     var request = window.ActiveXObject ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest;
-
     request.onreadystatechange = function() {
         if (request.readyState == 4) {
             request.onreadystatechange = doNothing;
@@ -135,17 +156,3 @@ function downloadUrl(url, callback) {
     request.send(null);
 }
 function doNothing() {}
-// window.eqfeed_callback = function(data) {
-//     map.data.addGeoJson(data);
-// }
-// var mapStyle = [
-//     {
-//         "featureType": "all",
-//         "elementType": "all",
-//         "stylers": [{"visibility": "on"}]
-//     }, {
-//         "featureType": "landscape",
-//         "elementType": "geometry",
-//         "styler:": [{"visibility": "on"}]
-//     }
-// ];
