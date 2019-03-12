@@ -21,20 +21,58 @@ function initMap() {
     directionsDisplay.setMap(map);
 
     service = new google.maps.places.PlacesService(map);
-
-
-    // service.findPlaceFromQuery(request, function(results, status) {
-    //     if (!status === google.maps.places.PlacesServiceStatus.OK) return;
-    //     for (var i = 0; i < results.length; i++) {
-    //         results[i]
-    //     }
-    // })
     
     var preferredIcon = "images/preferred.png", otherIcon = "images/other.png";
     downloadUrl("scripts/couriers.xml", function(data) {
         var xml = data.responseXML;
+        var i = 0, j = 0;
         var markers = xml.documentElement.getElementsByTagName("marker");
         Array.prototype.forEach.call(markers, function(e) { 
+            var getPlaceId = function(){
+                j++;
+                while (!place_id) {
+                    var phRequest = {phoneNumber: ph, fields: ["place_id", "name"]};
+                    service.findPlaceFromPhoneNumber(phRequest, function(results, status) {
+                        if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                                setTimeout(function() {
+                                getPlaceId();
+                            }, 200);
+                        }
+                        if (!results) return;
+                        j++;
+                        console.log("Found from phone #: ", id, results[0].name, results[0].place_id);
+                        place_id = results[0].place_id;
+                    });
+                    var qRequest = {query: (name + " " + city + " " + st), fields: ["place_id", "name"]}
+                    service.findPlaceFromQuery(qRequest, function(results, status) {
+                        if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                                setTimeout(function() {
+                                    getPlaceId();
+                            }, 200);
+                        }
+                        if (!results) return "";
+                        console.log("Found from query:", id, results[0].name, results[0].place_id);
+                        j++;
+                        place_id = results[0].place_id;
+                    });
+                    break;
+                }
+                
+            }
+            var getPlaceDetails = function(request) {
+                if (lat > 0) return;
+                service.getDetails(request, function(place, status) {
+                    if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                        setTimeout(function() {
+                            getPlaceDetails(request);
+                        }, 200);
+                    }
+                    if (!place) return;
+                    console.log(id + " Place lookup returned: " + place.geometry.location + " original was: " + point);
+                    point = place.geometry.location;
+                    i++;
+                });
+            }
             var id = e.getAttribute("id"), name = e.getAttribute("name"), acc = e.getAttribute("account"),
             city = e.getAttribute("city"), st = e.getAttribute("state"),
             ph = e.getAttribute("phone"),  ph2 = e.getAttribute("phone2"), f = e.getAttribute("fax"),
@@ -42,40 +80,13 @@ function initMap() {
             gr = parseInt(e.getAttribute("grade")), v = e.getAttribute("vehicles"), usa = e.getAttribute("usa"),
             iac = e.getAttribute("iac"), hm = e.getAttribute("hm"),
             tsa = e.getAttribute("tsa"), nfo = e.getAttribute("nfo"),
-            ico = {url: (gr>3) ? preferredIcon : otherIcon},
-            place_id;
-            var point = new google.maps.LatLng(parseFloat(e.getAttribute("lat")), parseFloat(e.getAttribute("lng")));
-
-            var getPlaceId = function(){
-                if (!e.getAttribute("place_id")) {
-                    var phRequest = {phoneNumber: ph, fields: ["place_id"]};
-                    service.findPlaceFromPhoneNumber(phRequest, function(results, status) {
-                        if (!status === google.maps.places.PlacesServiceStatus.OK) return "";
-                        if (!results) return "";
-                        place_id = results[0].place_id;
-                    });
-                }
-                else place_id = e.getAttribute("place_id");
-            }
-            getPlaceId();
-            var getPlaceDetails = function(request) {
-                service.getDetails(request, function(place, status) {
-                    if (!status === google.maps.places.PlacesServiceStatus.OK) {
-                        setTimeout(function() {
-                            getPlaceDetails(request);
-                        }, 200);
-                    }
-                    if (place) if (point !== place.geometry.location) console.log(place_id + " " + place.geometry.location);   
-                    else console.log(name);
-                });
-                if (point) return point;
-            }
-    
-            if (place_id) {
-                var detailsRequest = {placeId: place_id, fields: ["name", "geometry.location"]};
-                point = getPlaceDetails(detailsRequest);
-            }
-            if (place_id) ico = {url: "images/box_full.png"}
+            ico = {url: (gr>3) ? preferredIcon : otherIcon}, place_id;
+            var point = new google.maps.LatLng(parseFloat(e.getAttribute("lat")), parseFloat(e.getAttribute("lng"))),
+            lat = parseFloat(e.getAttribute("lat"));
+            if (e.getAttribute("place_id") == "") getPlaceId();
+            else place_id = e.getAttribute("place_id");
+            if (place_id) getPlaceDetails({placeId: place_id, fields: ["name", "geometry.location"]});
+            else ico = {url: "images/box_full.png"};
             var marker = new google.maps.Marker({
                 map: map,
                 position: point,
@@ -88,10 +99,8 @@ function initMap() {
                 infowindow.open(map, marker);
                 document.getElementById("courier").innerHTML = name;
                 document.getElementById("ph").innerHTML = ph;
-                phRequest = {phoneNumber: ph, fields: ["place_id"]}
                 c = point;
                 n = name;
-                if (!place_id) getPlaceId(phRequest, name);
                 onChangeHandler();
             });
         });
