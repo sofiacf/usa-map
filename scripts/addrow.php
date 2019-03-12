@@ -21,6 +21,7 @@ $email = $_GET['email'];
 $phone2 = $_GET['phone2'];
 $notes = $_GET['notes'];
 $contact = $_GET['contact'];
+echo $id;
 
 $connection=mysqli_connect ($servername, $username, $password);
 if (!$connection) die("Connection failed: " . mysqli_connect_error());
@@ -31,30 +32,30 @@ if (!$db_selected) die ('Can\'t use db : ' . mysqli_error($connection));
 $query = sprintf("INSERT INTO couriers " .
          " (id, name, place_id, lat, lng, city, state, grade, usa, iac, hm, tsa, nfo, vehicles, phone, fax, account, email, phone2, notes, contact ) " .
          " VALUES ('%s', '%s', '%s', '%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', '%s', '%s', '%s');",
-         mysql_real_escape_string($id),
-         mysql_real_escape_string($name),
-         mysql_real_escape_string($place_id),
-         mysql_real_escape_string($lat),
-         mysql_real_escape_string($lng),
-         mysql_real_escape_string($city),
-         mysql_real_escape_string($state),
-         mysql_real_escape_string($grade),
-         mysql_real_escape_string($usa),
-         mysql_real_escape_string($iac),
-         mysql_real_escape_string($hm),
-         mysql_real_escape_string($tsa),
-         mysql_real_escape_string($nfo),
-         mysql_real_escape_string($vehicles),
-         mysql_real_escape_string($phone),
-         mysql_real_escape_string($fax),
-         mysql_real_escape_string($account),
-         mysql_real_escape_string($email),
-         mysql_real_escape_string($phone2),
-         mysql_real_escape_string($notes),
-         mysql_real_escape_string($contact));
+         mysqli_real_escape_string($connection, $id),
+         mysqli_real_escape_string($connection, $name),
+         mysqli_real_escape_string($connection, $place_id),
+         mysqli_real_escape_string($connection, $lat),
+         mysqli_real_escape_string($connection, $lng),
+         mysqli_real_escape_string($connection, $city),
+         mysqli_real_escape_string($connection, $state),
+         mysqli_real_escape_string($connection, $grade),
+         mysqli_real_escape_string($connection, $usa),
+         mysqli_real_escape_string($connection, $iac),
+         mysqli_real_escape_string($connection, $hm),
+         mysqli_real_escape_string($connection, $tsa),
+         mysqli_real_escape_string($connection, $nfo),
+         mysqli_real_escape_string($connection, $vehicles),
+         mysqli_real_escape_string($connection, $phone),
+         mysqli_real_escape_string($connection, $fax),
+         mysqli_real_escape_string($connection, $account),
+         mysqli_real_escape_string($connection, $email),
+         mysqli_real_escape_string($connection, $phone2),
+         mysqli_real_escape_string($connection, $notes),
+         mysqli_real_escape_string($connection, $contact));
 
-$result = mysql_query($query);
+$result = mysqli_query($connection, $query);
 
-if (!$result) die('Invalid query: ' . mysql_error($connection));
+if (!$result) die('Invalid query: ' . mysqli_error($connection));
 echo "hey";
 ?>

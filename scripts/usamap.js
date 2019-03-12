@@ -35,6 +35,7 @@ function initMap() {
                     + notes + "&contact" + contact;
                 downloadUrl(url, function(data, responseCode) {
                     if (responseCode == 200 && data.length <= 1) console.log("Saved data on id ", id);
+                    else console.log(responseCode);
                 });
             }
             var getPlaceId = function(){
