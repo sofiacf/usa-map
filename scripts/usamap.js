@@ -1,5 +1,4 @@
-//Cache route, DirectionsRenderers array
-var map, c, n, infowindow, service, phRequest;
+var map, c, n, infowindow, service;
 
 document.getElementById("dispatch-panel").style.display = "none";
 function initMap() {
@@ -21,15 +20,25 @@ function initMap() {
     directionsDisplay.setMap(map);
 
     service = new google.maps.places.PlacesService(map);
-    
+    var courierCount = 0;
     var preferredIcon = "images/preferred.png", otherIcon = "images/other.png";
-    downloadUrl("scripts/couriers.xml", function(data) {
+    downloadUrl("https://smcf.io/map/scripts/cache_ids.php", function(data) {
         var xml = data.responseXML;
-        var i = 0, j = 0;
         var markers = xml.documentElement.getElementsByTagName("marker");
-        Array.prototype.forEach.call(markers, function(e) { 
+        Array.prototype.forEach.call(markers, function(e) {
+            courierCount++;
+            var saveData = function(){
+                console.log("trying to save data");
+                var url = "https://smcf.io/map/scripts/addrow.php?id=" + id + "&name=" + name + "&place_id=" + place_id + "&lat" + point.lat() + "&lng" + point.lng() 
+                    + "&city"+ city + "&state" + st + "&grade" + grade + "&usa" + usa + "&iac" + iac + "&hm" + hm + "&tsa" + tsa + "&nfo" + nfo 
+                    + "&vehicles" + vehicles + "&phone" + ph + "&fax" + fax + "&account" + account + "&email" + email + "&phone2" + phone2 + "&notes" 
+                    + notes + "&contact" + contact;
+                downloadUrl(url, function(data, responseCode) {
+                    if (responseCode == 200 && data.length <= 1) console.log("Saved data on id ", id);
+                });
+            }
             var getPlaceId = function(){
-                j++;
+                var updated = false;
                 while (!place_id) {
                     var phRequest = {phoneNumber: ph, fields: ["place_id", "name"]};
                     service.findPlaceFromPhoneNumber(phRequest, function(results, status) {
@@ -39,8 +48,7 @@ function initMap() {
                             }, 200);
                         }
                         if (!results) return;
-                        j++;
-                        console.log("Found from phone #: ", id, results[0].name, results[0].place_id);
+                        updated = true;
                         place_id = results[0].place_id;
                     });
                     var qRequest = {query: (name + " " + city + " " + st), fields: ["place_id", "name"]}
@@ -51,15 +59,15 @@ function initMap() {
                             }, 200);
                         }
                         if (!results) return "";
-                        console.log("Found from query:", id, results[0].name, results[0].place_id);
-                        j++;
+                        // console.log("Found from query:", id, results[0].name, results[0].place_id);
                         place_id = results[0].place_id;
                     });
                     break;
                 }
-                
+                if (updated == true) saveData();
             }
             var getPlaceDetails = function(request) {
+                var updated = false;
                 if (lat > 0) return;
                 service.getDetails(request, function(place, status) {
                     if (status !== google.maps.places.PlacesServiceStatus.OK) {
@@ -68,10 +76,11 @@ function initMap() {
                         }, 200);
                     }
                     if (!place) return;
-                    console.log(id + " Place lookup returned: " + place.geometry.location + " original was: " + point);
                     point = place.geometry.location;
-                    i++;
-                });
+                    updated = true;
+                    console.log(updated);
+                    if (updated == true) saveData();
+                });   
             }
             var id = e.getAttribute("id"), name = e.getAttribute("name"), acc = e.getAttribute("account"),
             city = e.getAttribute("city"), st = e.getAttribute("state"),
@@ -104,6 +113,7 @@ function initMap() {
                 onChangeHandler();
             });
         });
+        console.log(courierCount);
     });
     var onChangeHandler = function() {
         if (!document.getElementById("d-input").value) return;
