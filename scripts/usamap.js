@@ -20,29 +20,28 @@ function initMap() {
     directionsDisplay.setMap(map);
 
     service = new google.maps.places.PlacesService(map);
-    var courierCount = 0;
     var preferredIcon = "images/preferred.png", otherIcon = "images/other.png";
     downloadUrl("https://smcf.io/map/scripts/cache_ids.php", function(data) {
         var xml = data.responseXML;
         var markers = xml.documentElement.getElementsByTagName("marker");
         Array.prototype.forEach.call(markers, function(e) {
-            courierCount++;
             var saveData = function(){
-                console.log("trying to save data");
-                var url = "https://smcf.io/map/scripts/addrow.php?id=" + id + "&name=" + name + "&place_id=" + place_id + "&lat" + point.lat() + "&lng" + point.lng() 
-                    + "&city"+ city + "&state" + st + "&grade" + grade + "&usa" + usa + "&iac" + iac + "&hm" + hm + "&tsa" + tsa + "&nfo" + nfo 
-                    + "&vehicles" + vehicles + "&phone" + ph + "&fax" + fax + "&account" + account + "&email" + email + "&phone2" + phone2 + "&notes" 
-                    + notes + "&contact" + contact;
-                downloadUrl(url, function(data, responseCode) {
-                    if (responseCode == 200 && data.length <= 1) console.log("Saved data on id ", id);
-                    else console.log(responseCode);
+                var url = "https://smcf.io/map/scripts/addrow.php?id=" + id + "&name=" + name
+                    + "&place_id=" + place_id + "&lat" + point.lat() + "&lng" + point.lng()
+                    + "&city"+ city + "&state" + state + "&grade" + grade + "&usa" + usa
+                    + "&iac" + iac + "&hm" + hm + "&tsa" + tsa + "&nfo" + nfo
+                    + "&vehicles" + vehicles + "&phone" + phone + "&fax" + fax + "&account" + account
+                    + "&email" + email + "&phone2" + phone2 + "&notes" + notes + "&contact" + contact;
+                downloadUrl(url, function(data, response) {
+                    if (response == 200 && data.length <= 1) console.log("Saved data on id", id);
+                    else console.log(data.length);
                 });
             }
             var getPlaceId = function(){
                 var updated = false;
                 while (!place_id) {
-                    var phRequest = {phoneNumber: ph, fields: ["place_id", "name"]};
-                    service.findPlaceFromPhoneNumber(phRequest, function(results, status) {
+                    var pRequest = {phoneNumber: phone, fields: ["place_id", "name"]};
+                    service.findPlaceFromPhoneNumber(pRequest, function(results, status) {
                         if (status !== google.maps.places.PlacesServiceStatus.OK) {
                                 setTimeout(function() {
                                 getPlaceId();
@@ -52,7 +51,7 @@ function initMap() {
                         updated = true;
                         place_id = results[0].place_id;
                     });
-                    var qRequest = {query: (name + " " + city + " " + st), fields: ["place_id", "name"]}
+                    var qRequest = {query: (name + " " + city + " " + state), fields: ["place_id", "name"]}
                     service.findPlaceFromQuery(qRequest, function(results, status) {
                         if (status !== google.maps.places.PlacesServiceStatus.OK) {
                                 setTimeout(function() {
@@ -79,20 +78,20 @@ function initMap() {
                     if (!place) return;
                     point = place.geometry.location;
                     updated = true;
-                    console.log(updated);
+                    console.log(updated, id);
                     if (updated == true) saveData();
-                });   
+                });
             }
-            var id = e.getAttribute("id"), name = e.getAttribute("name"), acc = e.getAttribute("account"),
-            city = e.getAttribute("city"), st = e.getAttribute("state"),
-            ph = e.getAttribute("phone"),  ph2 = e.getAttribute("phone2"), f = e.getAttribute("fax"),
-            email = e.getAttribute("email"), con = e.getAttribute("contact"), x = e.getAttribute("notes"),
-            gr = parseInt(e.getAttribute("grade")), v = e.getAttribute("vehicles"), usa = e.getAttribute("usa"),
-            iac = e.getAttribute("iac"), hm = e.getAttribute("hm"),
-            tsa = e.getAttribute("tsa"), nfo = e.getAttribute("nfo"),
-            ico = {url: (gr>3) ? preferredIcon : otherIcon}, place_id;
+            var id = e.getAttribute("id"), name = e.getAttribute("name"), account = e.getAttribute("account"),
+                city = e.getAttribute("city"), state = e.getAttribute("state"), phone = e.getAttribute("phone"),
+                phone2 = e.getAttribute("phone2"), fax = e.getAttribute("fax"),
+                email = e.getAttribute("email"), contact = e.getAttribute("contact"), notes = e.getAttribute("notes"),
+                grade = parseInt(e.getAttribute("grade")), vehicles = e.getAttribute("vehicles"),
+                usa = e.getAttribute("usa"), iac = e.getAttribute("iac"), hm = e.getAttribute("hm"),
+                tsa = e.getAttribute("tsa"), nfo = e.getAttribute("nfo"),
+                ico = {url: (grade>3) ? preferredIcon : otherIcon}, place_id;
             var point = new google.maps.LatLng(parseFloat(e.getAttribute("lat")), parseFloat(e.getAttribute("lng"))),
-            lat = parseFloat(e.getAttribute("lat"));
+                lat = parseFloat(e.getAttribute("lat"));
             if (e.getAttribute("place_id") == "") getPlaceId();
             else place_id = e.getAttribute("place_id");
             if (place_id) getPlaceDetails({placeId: place_id, fields: ["name", "geometry.location"]});
@@ -104,17 +103,16 @@ function initMap() {
                 label: name
             });
             marker.addListener("click", function() {
-                infowindow.setContent(`<div><p>${name}</p><p>${ph}</p></div>`);
+                infowindow.setContent(`<div><p>${name}</p><p>${phone}</p></div>`);
                 infowindow.setOptions({pixelOffset: new google.maps.Size(0, -30)});
                 infowindow.open(map, marker);
                 document.getElementById("courier").innerHTML = name;
-                document.getElementById("ph").innerHTML = ph;
+                document.getElementById("ph").innerHTML = phone;
                 c = point;
                 n = name;
                 onChangeHandler();
             });
         });
-        console.log(courierCount);
     });
     var onChangeHandler = function() {
         if (!document.getElementById("d-input").value) return;
@@ -165,14 +163,14 @@ function Delivery() {
     }
 }
 function downloadUrl(url, callback) {
-    var request = window.ActiveXObject ? new ActiveXObject('Microsoft.XMLHTTP') : new XMLHttpRequest;
+    var request = window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest;
     request.onreadystatechange = function() {
         if (request.readyState == 4) {
             request.onreadystatechange = doNothing;
             callback(request, request.status);
         }
     };
-    request.open('GET', url, true);
+    request.open("GET", url, true);
     request.send(null);
 }
 function doNothing() {}

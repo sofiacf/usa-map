@@ -57,5 +57,5 @@ $query = sprintf("INSERT INTO couriers " .
 $result = mysqli_query($connection, $query);
 
 if (!$result) die('Invalid query: ' . mysqli_error($connection));
-echo "hey";
+mysqli_close($connection);
 ?>

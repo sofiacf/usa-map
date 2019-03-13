@@ -64,4 +64,5 @@ while ($row = @mysqli_fetch_assoc($result)){
   $ind = $ind + 1;
 }
 echo '</markers>';
+mysqli_close($connection);
 ?>
