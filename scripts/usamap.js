@@ -18,7 +18,6 @@ function initMap() {
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(quoteForm);
     map.controls[google.maps.ControlPosition.LEFT].push(dispatchPanel);
     directionsDisplay.setMap(map);
-    var numMarkers = 0;
     service = new google.maps.places.PlacesService(map);
     var preferredIcon = "images/preferred.png", otherIcon = "images/other.png";
     downloadUrl("https://smcf.io/map/scripts/cache_ids.php", function(data) {
@@ -37,7 +36,6 @@ function initMap() {
                 });
             }
             var addMarker = function(){
-                numMarkers++;
                 marker = new google.maps.Marker({
                     map: map,
                     position: point,
@@ -68,7 +66,6 @@ function initMap() {
                     place_id = results[0].place_id;
                     saveData();
                     addMarker();
-                    getPlaceDetails();
                 });
                 // if (place_id) return;
                 // var qRequest = {query: (name + " " + city + " " + state), fields: ["place_id", "name"]}
@@ -122,7 +119,6 @@ function initMap() {
                 addMarker();
             }
         });
-        console.log(numMarkers);
     });
     var onChangeHandler = function() {
         if (!document.getElementById("d-input").value) return;
