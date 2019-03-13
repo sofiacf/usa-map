@@ -26,49 +26,46 @@ function initMap() {
         var markers = xml.documentElement.getElementsByTagName("marker");
         Array.prototype.forEach.call(markers, function(e) {
             var saveData = function(){
+                var lng = (point.lat() > 1) ? point.lng() : 0.000005;
+                var lat = (point.lat() >1) ? point.lat() : 0.000005;
                 var url = "https://smcf.io/map/scripts/addrow.php?id=" + id + "&name=" + name
-                    + "&place_id=" + place_id + "&lat" + point.lat() + "&lng" + point.lng()
-                    + "&city"+ city + "&state" + state + "&grade" + grade + "&usa" + usa
-                    + "&iac" + iac + "&hm" + hm + "&tsa" + tsa + "&nfo" + nfo
-                    + "&vehicles" + vehicles + "&phone" + phone + "&fax" + fax + "&account" + account
-                    + "&email" + email + "&phone2" + phone2 + "&notes" + notes + "&contact" + contact;
+                    + "&place_id=" + place_id + "&lat=" + lat + "&lng=" + lng
+                    + "&city="+ city + "&state=" + state + "&grade=" + grade + "&usa=" + usa
+                    + "&iac=" + iac + "&hm=" + hm + "&tsa=" + tsa + "&nfo=" + nfo
+                    + "&vehicles=" + vehicles + "&phone=" + phone + "&fax=" + fax + "&account=" + account
+                    + "&email=" + email + "&phone2=" + phone2 + "&notes=" + notes + "&contact=" + contact;
                 downloadUrl(url, function(data, response) {
-                    if (response == 200 && data.length <= 1) console.log("Saved data on id", id);
-                    else console.log(data.length);
+                    console.log("Saved data on id", id, "place_id:", place_id, "lat:", lat, "lng:", lng);
                 });
             }
             var getPlaceId = function(){
-                var updated = false;
-                while (!place_id) {
-                    var pRequest = {phoneNumber: phone, fields: ["place_id", "name"]};
-                    service.findPlaceFromPhoneNumber(pRequest, function(results, status) {
-                        if (status !== google.maps.places.PlacesServiceStatus.OK) {
-                                setTimeout(function() {
+                if (place_id) return;
+                var pRequest = {phoneNumber: phone, fields: ["place_id", "name"]};
+                service.findPlaceFromPhoneNumber(pRequest, function(results, status) {
+                    if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                            setTimeout(function() {
+                            getPlaceId();
+                        }, 200);
+                    }
+                    if (!results) return;
+                    place_id = results[0].place_id;
+                    saveData();
+                });
+                if (place_id) return;
+                var qRequest = {query: (name + " " + city + " " + state), fields: ["place_id", "name"]}
+                service.findPlaceFromQuery(qRequest, function(results, status) {
+                    if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                            setTimeout(function() {
                                 getPlaceId();
-                            }, 200);
-                        }
-                        if (!results) return;
-                        updated = true;
-                        place_id = results[0].place_id;
-                    });
-                    var qRequest = {query: (name + " " + city + " " + state), fields: ["place_id", "name"]}
-                    service.findPlaceFromQuery(qRequest, function(results, status) {
-                        if (status !== google.maps.places.PlacesServiceStatus.OK) {
-                                setTimeout(function() {
-                                    getPlaceId();
-                            }, 200);
-                        }
-                        if (!results) return "";
-                        // console.log("Found from query:", id, results[0].name, results[0].place_id);
-                        place_id = results[0].place_id;
-                    });
-                    break;
-                }
-                if (updated == true) saveData();
+                        }, 200);
+                    }
+                    if (!results) return "";
+                    // console.log("Found from query:", id, results[0].name, results[0].place_id);
+                    place_id = results[0].place_id;
+                });
             }
             var getPlaceDetails = function(request) {
-                var updated = false;
-                if (lat > 0) return;
+                if (point.lat() > 1 && point.lng() > 1) return;
                 service.getDetails(request, function(place, status) {
                     if (status !== google.maps.places.PlacesServiceStatus.OK) {
                         setTimeout(function() {
@@ -77,9 +74,7 @@ function initMap() {
                     }
                     if (!place) return;
                     point = place.geometry.location;
-                    updated = true;
-                    console.log(updated, id);
-                    if (updated == true) saveData();
+                    saveData();
                 });
             }
             var id = e.getAttribute("id"), name = e.getAttribute("name"), account = e.getAttribute("account"),
@@ -90,8 +85,7 @@ function initMap() {
                 usa = e.getAttribute("usa"), iac = e.getAttribute("iac"), hm = e.getAttribute("hm"),
                 tsa = e.getAttribute("tsa"), nfo = e.getAttribute("nfo"),
                 ico = {url: (grade>3) ? preferredIcon : otherIcon}, place_id;
-            var point = new google.maps.LatLng(parseFloat(e.getAttribute("lat")), parseFloat(e.getAttribute("lng"))),
-                lat = parseFloat(e.getAttribute("lat"));
+            var point = new google.maps.LatLng(parseFloat(e.getAttribute("lat")), parseFloat(e.getAttribute("lng")));
             if (e.getAttribute("place_id") == "") getPlaceId();
             else place_id = e.getAttribute("place_id");
             if (place_id) getPlaceDetails({placeId: place_id, fields: ["name", "geometry.location"]});
@@ -128,8 +122,8 @@ function Delivery() {
         var o, r, w,
         p = document.getElementById("p-input").value,
         d = document.getElementById("d-input").value,
-        direct = document.getElementById("setjobtype-direct").checked,
-        hold = document.getElementById("setjobtype-hold").checked,
+        direct = document.getElementById("setjobtype-direct"),
+        hold = document.getElementById("setjobtype-hold"),
         rt = document.getElementById("setjobtype-rt").checked;
         o = c ? c : p;
         dest = (rt) ? p : d;

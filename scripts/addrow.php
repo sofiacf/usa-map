@@ -21,7 +21,6 @@ $email = $_GET['email'];
 $phone2 = $_GET['phone2'];
 $notes = $_GET['notes'];
 $contact = $_GET['contact'];
-echo $id;
 
 $connection=mysqli_connect ($servername, $username, $password);
 if (!$connection) die("Connection failed: " . mysqli_connect_error());
@@ -29,7 +28,7 @@ if (!$connection) die("Connection failed: " . mysqli_connect_error());
 $db_selected = mysqli_select_db($connection, $database);
 if (!$db_selected) die ('Can\'t use db : ' . mysqli_error($connection));
 
-$query = sprintf("INSERT INTO couriers " .
+$query = sprintf("REPLACE INTO couriers " .
          " (id, name, place_id, lat, lng, city, state, grade, usa, iac, hm, tsa, nfo, vehicles, phone, fax, account, email, phone2, notes, contact ) " .
          " VALUES ('%s', '%s', '%s', '%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s', '%s', '%s', '%s');",
          mysqli_real_escape_string($connection, $id),
