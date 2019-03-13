@@ -8,7 +8,7 @@ function initMap() {
         zoom: 4
     };
     map = new google.maps.Map(document.getElementById("map"), mapOptions);
-
+    var rowsUpdated = 0;
     var quoteForm = document.getElementById("quote-form"),
     dispatchPanel = document.getElementById("dispatch-panel"),
     directionsService = new google.maps.DirectionsService(),
@@ -32,7 +32,8 @@ function initMap() {
                     + "&vehicles=" + vehicles + "&phone=" + phone + "&fax=" + fax + "&account=" + account
                     + "&email=" + email + "&phone2=" + phone2 + "&notes=" + notes + "&contact=" + contact;
                 downloadUrl(url, function(data, response) {
-                    console.log("Saved data on id", id, "place_id:", place_id, "lat:", point.lat(), "lng:", point.lng());
+                    rowsUpdated++;
+                    console.log(rowsUpdated);
                 });
             }
             var addMarker = function(){
@@ -40,7 +41,7 @@ function initMap() {
                     map: map,
                     position: point,
                     icon: ico,
-                    label: name
+                    // label: name
                     });
                 marker.addListener("click", function() {
                     infowindow.setContent(`<div><p>${name}</p><p>${phone}</p></div>`);
@@ -54,7 +55,7 @@ function initMap() {
                 }); 
             }
             var getPlaceId = function(){
-                if (place_id) return;
+                if (place_id == "notfound") return;
                 var pRequest = {phoneNumber: phone, fields: ["place_id", "name"]};
                 service.findPlaceFromPhoneNumber(pRequest, function(results, status) {
                     if (status !== google.maps.places.PlacesServiceStatus.OK) {
@@ -62,10 +63,16 @@ function initMap() {
                             getPlaceId();
                         }, 200);
                     }
-                    if (!results) return;
-                    place_id = results[0].place_id;
-                    saveData();
-                    addMarker();
+                    else if (!results) {
+                        place_id = "notfound";
+                        saveData();
+                        return;
+                    }
+                    else {
+                        place_id = results[0].place_id;
+                        saveData();
+                        addMarker();
+                    }
                 });
                 // if (place_id) return;
                 // var qRequest = {query: (name + " " + city + " " + state), fields: ["place_id", "name"]}
@@ -82,6 +89,8 @@ function initMap() {
                 // });
             }
             var getPlaceDetails = function() {
+                if (place_id == "temp") return;
+                if (place_id == "notfound") return;
                 if (point.lat() > 1 && point.lng() < -1) {
                     addMarker();
                     return;
@@ -113,10 +122,6 @@ function initMap() {
             else {
                 place_id = e.getAttribute("place_id");
                 getPlaceDetails();
-            }
-            if (!place_id) {
-                ico = {url: "images/box_full.png"};
-                addMarker();
             }
         });
     });
