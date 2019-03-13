@@ -18,7 +18,7 @@ function initMap() {
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(quoteForm);
     map.controls[google.maps.ControlPosition.LEFT].push(dispatchPanel);
     directionsDisplay.setMap(map);
-
+    var numMarkers = 0;
     service = new google.maps.places.PlacesService(map);
     var preferredIcon = "images/preferred.png", otherIcon = "images/other.png";
     downloadUrl("https://smcf.io/map/scripts/cache_ids.php", function(data) {
@@ -26,17 +26,34 @@ function initMap() {
         var markers = xml.documentElement.getElementsByTagName("marker");
         Array.prototype.forEach.call(markers, function(e) {
             var saveData = function(){
-                var lng = (point.lat() > 1) ? point.lng() : 0.000005;
-                var lat = (point.lat() >1) ? point.lat() : 0.000005;
                 var url = "https://smcf.io/map/scripts/addrow.php?id=" + id + "&name=" + name
-                    + "&place_id=" + place_id + "&lat=" + lat + "&lng=" + lng
+                    + "&place_id=" + place_id + "&lat=" + point.lat() + "&lng=" + point.lng()
                     + "&city="+ city + "&state=" + state + "&grade=" + grade + "&usa=" + usa
                     + "&iac=" + iac + "&hm=" + hm + "&tsa=" + tsa + "&nfo=" + nfo
                     + "&vehicles=" + vehicles + "&phone=" + phone + "&fax=" + fax + "&account=" + account
                     + "&email=" + email + "&phone2=" + phone2 + "&notes=" + notes + "&contact=" + contact;
                 downloadUrl(url, function(data, response) {
-                    console.log("Saved data on id", id, "place_id:", place_id, "lat:", lat, "lng:", lng);
+                    console.log("Saved data on id", id, "place_id:", place_id, "lat:", point.lat(), "lng:", point.lng());
                 });
+            }
+            var addMarker = function(){
+                numMarkers++;
+                marker = new google.maps.Marker({
+                    map: map,
+                    position: point,
+                    icon: ico,
+                    label: name
+                    });
+                marker.addListener("click", function() {
+                    infowindow.setContent(`<div><p>${name}</p><p>${phone}</p></div>`);
+                    infowindow.setOptions({pixelOffset: new google.maps.Size(0, -30)});
+                    infowindow.open(map, marker);
+                    document.getElementById("courier").innerHTML = name;
+                    document.getElementById("ph").innerHTML = phone;
+                    c = point;
+                    n = name;
+                    onChangeHandler();
+                }); 
             }
             var getPlaceId = function(){
                 if (place_id) return;
@@ -50,31 +67,40 @@ function initMap() {
                     if (!results) return;
                     place_id = results[0].place_id;
                     saveData();
+                    addMarker();
+                    getPlaceDetails();
                 });
-                if (place_id) return;
-                var qRequest = {query: (name + " " + city + " " + state), fields: ["place_id", "name"]}
-                service.findPlaceFromQuery(qRequest, function(results, status) {
-                    if (status !== google.maps.places.PlacesServiceStatus.OK) {
-                            setTimeout(function() {
-                                getPlaceId();
-                        }, 200);
-                    }
-                    if (!results) return "";
-                    // console.log("Found from query:", id, results[0].name, results[0].place_id);
-                    place_id = results[0].place_id;
-                });
+                // if (place_id) return;
+                // var qRequest = {query: (name + " " + city + " " + state), fields: ["place_id", "name"]}
+                // service.findPlaceFromQuery(qRequest, function(results, status) {
+                //     if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                //             setTimeout(function() {
+                //                 getPlaceId();
+                //         }, 200);
+                //     }
+                //     if (!results) return "";
+                //     // console.log("Found from query:", id, results[0].name, results[0].place_id);
+                    // place_id = results[0].place_id;
+                    // addMarker();
+                // });
             }
-            var getPlaceDetails = function(request) {
-                if (point.lat() > 1 && point.lng() > 1) return;
+            var getPlaceDetails = function() {
+                if (point.lat() > 1 && point.lng() < -1) {
+                    addMarker();
+                    return;
+                }
+                var request = {placeId: place_id, fields: ["name", "geometry.location"]};
                 service.getDetails(request, function(place, status) {
-                    if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                    if (status == google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
                         setTimeout(function() {
                             getPlaceDetails(request);
                         }, 200);
                     }
+                    else if (status !== google.maps.places.PlacesServiceStatus.OK) return;
                     if (!place) return;
                     point = place.geometry.location;
                     saveData();
+                    addMarker();
                 });
             }
             var id = e.getAttribute("id"), name = e.getAttribute("name"), account = e.getAttribute("account"),
@@ -83,30 +109,20 @@ function initMap() {
                 email = e.getAttribute("email"), contact = e.getAttribute("contact"), notes = e.getAttribute("notes"),
                 grade = parseInt(e.getAttribute("grade")), vehicles = e.getAttribute("vehicles"),
                 usa = e.getAttribute("usa"), iac = e.getAttribute("iac"), hm = e.getAttribute("hm"),
-                tsa = e.getAttribute("tsa"), nfo = e.getAttribute("nfo"),
-                ico = {url: (grade>3) ? preferredIcon : otherIcon}, place_id;
-            var point = new google.maps.LatLng(parseFloat(e.getAttribute("lat")), parseFloat(e.getAttribute("lng")));
+                tsa = e.getAttribute("tsa"), nfo = e.getAttribute("nfo"), marker,
+                ico = {url: (grade>3) ? preferredIcon : otherIcon}, place_id,
+                point = new google.maps.LatLng(parseFloat(e.getAttribute("lat")), parseFloat(e.getAttribute("lng")));
             if (e.getAttribute("place_id") == "") getPlaceId();
-            else place_id = e.getAttribute("place_id");
-            if (place_id) getPlaceDetails({placeId: place_id, fields: ["name", "geometry.location"]});
-            else ico = {url: "images/box_full.png"};
-            var marker = new google.maps.Marker({
-                map: map,
-                position: point,
-                icon: ico,
-                label: name
-            });
-            marker.addListener("click", function() {
-                infowindow.setContent(`<div><p>${name}</p><p>${phone}</p></div>`);
-                infowindow.setOptions({pixelOffset: new google.maps.Size(0, -30)});
-                infowindow.open(map, marker);
-                document.getElementById("courier").innerHTML = name;
-                document.getElementById("ph").innerHTML = phone;
-                c = point;
-                n = name;
-                onChangeHandler();
-            });
+            else {
+                place_id = e.getAttribute("place_id");
+                getPlaceDetails();
+            }
+            if (!place_id) {
+                ico = {url: "images/box_full.png"};
+                addMarker();
+            }
         });
+        console.log(numMarkers);
     });
     var onChangeHandler = function() {
         if (!document.getElementById("d-input").value) return;
