@@ -55,23 +55,29 @@ function initMap() {
                 }); 
             }
             var getPlaceId = function(){
-                if (place_id == "notfound") return;
-                var pRequest = {phoneNumber: phone, fields: ["place_id", "name"]};
+                if (phone == "" && place_id == "") {
+                    place_id = "0";
+                    saveData();
+                    return;
+                }
+                var number = "+" + phone;
+                var pRequest = {phoneNumber: number, fields: ["place_id", "name"]};
                 service.findPlaceFromPhoneNumber(pRequest, function(results, status) {
-                    if (status !== google.maps.places.PlacesServiceStatus.OK) {
+                    if (status == google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
                             setTimeout(function() {
                             getPlaceId();
                         }, 200);
+                        return;
                     }
                     else if (!results) {
-                        place_id = "notfound";
+                        place_id = "0";
                         saveData();
                         return;
                     }
                     else {
                         place_id = results[0].place_id;
                         saveData();
-                        addMarker();
+                        getPlaceDetails();
                     }
                 });
                 // if (place_id) return;
@@ -89,8 +95,7 @@ function initMap() {
                 // });
             }
             var getPlaceDetails = function() {
-                if (place_id == "temp") return;
-                if (place_id == "notfound") return;
+                if (place_id == "0") return;
                 if (point.lat() > 1 && point.lng() < -1) {
                     addMarker();
                     return;
@@ -116,13 +121,10 @@ function initMap() {
                 grade = parseInt(e.getAttribute("grade")), vehicles = e.getAttribute("vehicles"),
                 usa = e.getAttribute("usa"), iac = e.getAttribute("iac"), hm = e.getAttribute("hm"),
                 tsa = e.getAttribute("tsa"), nfo = e.getAttribute("nfo"), marker,
-                ico = {url: (grade>3) ? preferredIcon : otherIcon}, place_id,
+                ico = {url: (grade>3) ? preferredIcon : otherIcon}, place_id = e.getAttribute("place_id"),
                 point = new google.maps.LatLng(parseFloat(e.getAttribute("lat")), parseFloat(e.getAttribute("lng")));
-            if (e.getAttribute("place_id") == "") getPlaceId();
-            else {
-                place_id = e.getAttribute("place_id");
-                getPlaceDetails();
-            }
+            if (place_id == "") getPlaceId();
+            else getPlaceDetails();
         });
     });
     var onChangeHandler = function() {
