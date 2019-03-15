@@ -95,11 +95,11 @@ function initMap() {
                 // });
             }
             var getPlaceDetails = function() {
-                if (place_id == "0") return;
                 if (point.lat() > 1 && point.lng() < -1) {
                     addMarker();
                     return;
                 }
+                if (place_id == "0") return;
                 var request = {placeId: place_id, fields: ["name", "geometry.location"]};
                 service.getDetails(request, function(place, status) {
                     if (status == google.maps.places.PlacesServiceStatus.OVER_QUERY_LIMIT) {
