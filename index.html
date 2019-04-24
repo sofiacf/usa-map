@@ -9,9 +9,6 @@
 	<body>
     <form id="quote-form" class="control-panel">
       <div><b>Generate quote</b></div>
-<!--       <div>
-        <span>Add: <input id="c-input" class="controls" type="text" placeholder="Courier name"></span>
-      </div> -->
       <div>
        <span>P: <input id="p-input" class="controls" type="text" placeholder="Pickup zip"></span>
         <span>D: <input id="d-input" class="controls" type="text" placeholder="Delivery zip"></span>
@@ -33,21 +30,11 @@
     </form>
     <div id="map"></div>
     <div id="dispatch-panel" class="control-panel">
-      <div>
-        <b>Base mileage: </b><span id="mileage"></span>
-      </div>
-      <div>
-        <b>Base quote: </b><span id="quote"></span>
-      </div>
-      <div>
-        <b>Courier: </b><span id="courier">Click map to add</span>
-      </div>
-      <div>
-        <b>Courier phone: </b><span id="ph"></span>
-      </div>
-      <div>
-        <b>$3/mi quote: </b><span id = "higher-quote"></span>
-      </div>
+      <div><b>Base mileage: </b><span id="mileage"></span></div>
+      <div><b>Base quote: </b><span id="quote"></span></div>
+			<div><b>Courier: </b><span id="courier">Click map to add</span></div>
+      <div><b>Courier phone: </b><span id="ph"></span></div>
+      <div><b>$3/mi quote: </b><span id = "higher-quote"></span></div>
       <form>
         <div>
           <b>Rate: </b>
@@ -67,7 +54,7 @@
               <option value="25">Weeknight</option>
               <option value="45">Weekend</option>
               <option value="45">Van</option>
-            </select>                        
+            </select>
           </span>
         </div>
       </form>

@@ -1,6 +1,6 @@
 <?php
 $servername = "usamap.db";
-$username = "add";
-$password = "temppassword123";
+$username = "read";
+$password = "K6BKVj3cgWMBlft9";
 $database= "usamap";
 ?>
