@@ -88,40 +88,45 @@ function initMap() {
 }
 
 function Delivery() {
-    function getRequest() {
-        var direct = <HTMLInputElement>document.getElementById("setjob-direct");
-        var hold = <HTMLInputElement>document.getElementById("setjob-hold");
-        var rt = <HTMLInputElement>document.getElementById("setjob-rt");
-
-        var pick = <HTMLInputElement>document.getElementById("p-input");
-        var drop = <HTMLInputElement>document.getElementById("d-input");
-
-        var delIsDirect = direct.checked;
-        var delIsHold = hold.checked;
-        var delIsRt = rt.checked;
-        var delPick = pick.value;
-        var delDrop = drop.value;
-
+    function getJobType(types){
+        for (let type in types){
+            if (document.getElementById(types[type])["checked"]) return type;
+        }
+    }
+    function getPickup(){
+        return document.getElementById("p-input")["value"];
+    }
+    function getDrop(){
+        return document.getElementById("d-input")["value"];
+    }
+    function getRequest(pick, drop) {
+        var jobTypes = {
+            DIRECT: 'setjob-direct',
+            HOLD: 'setjob-hold',
+            ROUNDTRIP: 'setjob-rt'
+        }
+        var jobType = getJobType(jobTypes);
+        var stops = [pick];
+        var end = drop;
+        switch (jobType) {
+            case jobTypes.ROUNDTRIP:
+                if (courier) stops.push(drop);
+                else stops = [drop];
+                end = pick;
+                break;
+            case jobTypes.HOLD:
+                if (courier) stops.push(courier);
+                break;
+        }
         var request = {
-            origin: courier || delPick,
-            destination: (delIsRt) ? delPick : delDrop,
+            origin: courier || stops.shift(),
+            destination: end,
             travelMode: "DRIVING"
         }
-        var waypoints = [{
-            location: courier ? delPick : delDrop,
-            stopover: true
-        }];
-
-        if (!courier && !delIsRt) return request;
-        if (!courier || delIsDirect) {
-            request["waypoints"] = waypoints;
-            return request;
+        if (stops.length) {
+            request["waypoints"] = stops.map(stop => (
+                {"location": stop, "stopover": true}));
         }
-        waypoints.push({
-            location: delIsHold ? courier : delDrop,
-            stopover: true
-        });
-        request["waypoints"] = waypoints;
         return request;
     }
 
@@ -132,7 +137,7 @@ function Delivery() {
         var add = parseInt(charges.value);
         return (mi > 15) ? (mi - 15) * permile + base + add : base + add;
     }
-    var request = getRequest();
+    var request = getRequest(getPickup(), getDrop());
     this.showRouteAndQuote = function (directionsService, directionsDisplay) {
         directionsService.route(request, function (result, status) {
             if (status !== "OK") return;
