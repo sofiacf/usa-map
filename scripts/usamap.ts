@@ -13,16 +13,23 @@ function initMap() {
     };
     map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-    var quoteForm = document.getElementById("quote-form");
-    var dispatchPanel = document.getElementById("dispatch-panel");
     var directionsService = new google.maps.DirectionsService();
     var directionsDisplay = new google.maps.DirectionsRenderer();
+    directionsDisplay.setMap(map);
+    service = new google.maps.places.PlacesService(map);
     infowindow = new google.maps.InfoWindow();
 
+    var quoteForm = document.getElementById("quote-form");
+    var dispatchPanel = document.getElementById("dispatch-panel");
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(quoteForm, dispatchPanel);
-    directionsDisplay.setMap(map);
+    
+    var onChangeHandler = function () {
+        if (!document.getElementById("d-input")["value"]) return;
+        dispatchPanel.style.display = "block";
+        var job = new Delivery();
+        job.showRouteAndQuote(directionsService, directionsDisplay);
+    }
 
-    service = new google.maps.places.PlacesService(map);
     var preferredIcon = "images/preferred.png";
     var otherIcon = "images/other.png";
     downloadUrl("https://smcf.nfshost.com/map/scripts/getcouriers.php", function (data) {
@@ -76,12 +83,6 @@ function initMap() {
             addMarker();
         });
     });
-    var onChangeHandler = function () {
-        if (!document.getElementById("d-input").value) return;
-        dispatchPanel.style.display = "block";
-        var job = new Delivery();
-        job.showRouteAndQuote(directionsService, directionsDisplay);
-    }
     quoteForm.addEventListener("change", onChangeHandler);
     dispatchPanel.addEventListener("change", onChangeHandler);
 }
