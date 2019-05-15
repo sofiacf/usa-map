@@ -83,12 +83,19 @@ function initMap() {
             addMarker();
         });
     });
+    quoteForm.addEventListener("change", onChangeHandler);
+    dispatchPanel.addEventListener("change", onChangeHandler);
 }
 function getChecked(field) {
     return document.getElementById(field)["checked"];
 }
 
 class Delivery {
+    static types = {
+        DIRECT: 'setjob-direct',
+        HOLD: 'setjob-hold',
+        ROUNDTRIP: 'setjob-rt'
+    };
     pick = document.getElementById("p-input")["value"];
     drop = document.getElementById("d-input")["value"];
     rate = document.getElementById("rate")["value"];
@@ -136,14 +143,15 @@ class Delivery {
 }
 
 function downloadUrl(url, callback) {
-    var request = window["ActiveXObject"] ? new ActiveXObject("Microsoft.XMLHTTP")
-    : new XMLHttpRequest;
+    var request = window["ActiveXObject"] ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest;
     request.onreadystatechange = function () {
         if (request.readyState == 4) {
-            request.onreadystatechange = {};
+            request.onreadystatechange = doNothing;
             callback(request, request.status);
         }
     };
     request.open("GET", url, true);
     request.send(null);
 }
+
+function doNothing() {}
