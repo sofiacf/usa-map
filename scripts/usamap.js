@@ -50,9 +50,13 @@ function initMap() {
                     onChangeHandler();
                 });
             }
-            var id = e.getAttribute("id"),
-                name = e.getAttribute("name"),
-                account = e.getAttribute("account"),
+            var lat = parseFloat(e.getAttribute("lat"));
+            var lng = parseFloat(e.getAttribute("lng"));
+            if (lat < 1 || lng > -1) return;
+            var point = new google.maps.LatLng(lat, lng);
+
+            var name = e.getAttribute("name");
+            var account = e.getAttribute("account"),
                 city = e.getAttribute("city"),
                 state = e.getAttribute("state"),
                 phone = e.getAttribute("phone"),
@@ -71,10 +75,8 @@ function initMap() {
                 marker,
                 ico = {
                     url: (grade > 3) ? preferredIcon : otherIcon
-                },
-                place_id = e.getAttribute("place_id"),
-                point = new google.maps.LatLng(parseFloat(e.getAttribute("lat")), parseFloat(e.getAttribute("lng")));
-            if (point.lat() > 1 && point.lng() < -1) addMarker();
+                };
+            addMarker();
         });
     });
     var onChangeHandler = function () {
