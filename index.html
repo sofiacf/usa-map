@@ -1,16 +1,15 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Map</title>
-		<meta name="viewport" content="initial-scale=1.0, user-scalable=no">
-		<meta charset="utf-8">
-		<link rel="stylesheet" href="usamap.css">
-	</head>
-	<body>
+    <title>Map</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="usamap.css">
+  </head>
+  <body>
     <form id="quote-form" class="control-panel">
       <div><b>Generate quote</b></div>
       <div>
-       <span>P: <input id="p-input" class="controls" type="text" placeholder="Pickup zip"></span>
+        <span>P: <input id="p-input" class="controls" type="text" placeholder="Pickup zip"></span>
         <span>D: <input id="d-input" class="controls" type="text" placeholder="Delivery zip"></span>
       </div>
       <div id="job-type-selector">
@@ -32,7 +31,7 @@
     <div id="dispatch-panel" class="control-panel">
       <div><b>Base mileage: </b><span id="mileage"></span></div>
       <div><b>Base quote: </b><span id="quote"></span></div>
-			<div><b>Courier: </b><span id="courier">Click map to add</span></div>
+      <div><b>Courier: </b><span id="courier">Click map to add</span></div>
       <div><b>Courier phone: </b><span id="ph"></span></div>
       <div><b>$3/mi quote: </b><span id = "higher-quote"></span></div>
       <form>
@@ -60,6 +59,6 @@
       </form>
     </div>
     <script src ="scripts/usamap.js"></script>
-		<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASF5hKHStSm4i3v2-XdyHFR_bUqWLh4m4&libraries=places&callback=initMap" type="text/javascript"></script>
-	</body>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyASF5hKHStSm4i3v2-XdyHFR_bUqWLh4m4&libraries=places&callback=initMap" type="text/javascript"></script>
+  </body>
 </html>

@@ -1,6 +1,7 @@
 var map, c, n, infowindow, service;
 
 document.getElementById("dispatch-panel").style.display = "none";
+
 function initMap() {
     var mapOptions = {
         mapTypeControl: false,
