@@ -142,7 +142,7 @@ function Delivery() {
                 higherQuote = getQuote(mi, 3);
             document.getElementById("mileage").innerHTML = mi + " mi";
             document.getElementById("quote").innerHTML = "$" + quote;
-            document.getElementById("higher-quote").innerHTML = "$" + higherQuote;
+            document.getElementById("$3-quote").innerHTML = "$" + higherQuote;
         });
     }
 }
