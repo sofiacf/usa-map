@@ -101,22 +101,20 @@ function Delivery() {
             destination: (rt) ? pick : drop,
             travelMode: "DRIVING"
         }
+        var waypoints = [{
+            location: courier ? pick : drop,
+            stopover: true
+        }];
 
-        if (!courier) {
-            if (!rt) return request;
-            else {
-                request.waypoints = [{
-                    "location": drop,
-                    "stopover": true
-                }];
-                return request;
-            }
+        if (!courier && !rt) return request;
+        if (!courier || direct) {
+            request.waypoints = waypoints;
+            return request;
         }
-        var waypoints = direct ? [pick] : hold ? [pick, courier] : [pick, drop];
-        for (var i = 0; i < waypoints.length; i++) waypoints[i] = {
-            "location": waypoints[i],
-            "stopover": true
-        };
+        waypoints.push({
+            location: hold ? courier : drop,
+            stopover: true
+        });
         request.waypoints = waypoints;
         return request;
     }
