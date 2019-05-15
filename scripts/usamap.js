@@ -1,4 +1,4 @@
-var map, c, n, infowindow, service;
+var map, courier, n, infowindow, service;
 
 document.getElementById("dispatch-panel").style.display = "none";
 
@@ -42,7 +42,7 @@ function initMap() {
                     infowindow.open(map, marker);
                     document.getElementById("courier").innerHTML = name;
                     document.getElementById("ph").innerHTML = phone;
-                    c = point;
+                    courier = point;
                     n = name;
                     onChangeHandler();
                 });
@@ -92,9 +92,9 @@ function Delivery() {
             direct = document.getElementById("setjobtype-direct"),
             hold = document.getElementById("setjobtype-hold"),
             rt = document.getElementById("setjobtype-rt").checked;
-        o = c ? c : p;
+        o = courier || p;
         dest = (rt) ? p : d;
-        if (!c && rt) {
+        if (!courier && rt) {
             w = [{
                 "location": d,
                 "stopover": true
@@ -105,14 +105,14 @@ function Delivery() {
                 destination: dest,
                 travelMode: "DRIVING"
             };
-        } else if (!c) {
+        } else if (!courier) {
             return {
                 origin: o,
                 destination: dest,
                 travelMode: "DRIVING"
             };
         }
-        w = direct.checked ? [p] : hold.checked ? [p, c] : [p, d];
+        w = direct.checked ? [p] : hold.checked ? [p, courier] : [p, d];
         for (var i = 0; i < w.length; i++) w[i] = {
             "location": w[i],
             "stopover": true
