@@ -86,13 +86,13 @@ function initMap() {
 
 function Delivery() {
     function getRequest() {
-        var o, r, w, dest,
+        var origin, r, w, dest,
             p = document.getElementById("p-input").value,
             d = document.getElementById("d-input").value,
             direct = document.getElementById("setjobtype-direct"),
             hold = document.getElementById("setjobtype-hold"),
             rt = document.getElementById("setjobtype-rt").checked;
-        o = courier || p;
+        origin = courier || p;
         dest = (rt) ? p : d;
         if (!courier && rt) {
             w = [{
@@ -100,14 +100,14 @@ function Delivery() {
                 "stopover": true
             }];
             return {
-                origin: o,
+                origin: origin,
                 waypoints: w,
                 destination: dest,
                 travelMode: "DRIVING"
             };
         } else if (!courier) {
             return {
-                origin: o,
+                origin: origin,
                 destination: dest,
                 travelMode: "DRIVING"
             };
@@ -118,7 +118,7 @@ function Delivery() {
             "stopover": true
         };
         return {
-            origin: o,
+            origin: origin,
             destination: dest,
             travelMode: "DRIVING",
             waypoints: w
