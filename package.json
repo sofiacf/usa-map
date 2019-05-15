@@ -4,5 +4,8 @@
     },
     "scripts": {
         "test": "jest"
+    },
+    "dependencies": {
+        "@types/googlemaps": "^3.30.20"
     }
 }
