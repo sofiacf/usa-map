@@ -5,7 +5,10 @@ document.getElementById("dispatch-panel").style.display = "none";
 function initMap() {
     var mapOptions = {
         mapTypeControl: false,
-        center: {lat: 39.397, lng: -97.644},
+        center: {
+            lat: 39.397,
+            lng: -97.644
+        },
         zoom: 4
     };
     map = new google.maps.Map(document.getElementById("map"), mapOptions);
