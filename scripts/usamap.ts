@@ -19,8 +19,7 @@ function initMap() {
     var directionsDisplay = new google.maps.DirectionsRenderer();
     infowindow = new google.maps.InfoWindow();
 
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(quoteForm);
-    map.controls[google.maps.ControlPosition.LEFT].push(dispatchPanel);
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(quoteForm, dispatchPanel);
     directionsDisplay.setMap(map);
 
     service = new google.maps.places.PlacesService(map);
@@ -139,7 +138,7 @@ function Delivery() {
             directionsDisplay.setDirections(result);
             var mi = 0,
                 legs = result.routes[0].legs;
-            for (var i = 0; i < legs.length; i++) mi += parseInt(legs[i].distance.value * 0.0006213712);
+            for (var i = 0; i < legs.length; i++) mi += Math.floor(legs[i].distance.value * 0.0006213712);
             var quote = getQuote(mi, 2.25),
                 higherQuote = getQuote(mi, 3);
             document.getElementById("mileage").innerHTML = mi + " mi";
@@ -150,7 +149,7 @@ function Delivery() {
 }
 
 function downloadUrl(url, callback) {
-    var request = window.ActiveXObject ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest;
+    var request = window["ActiveXObject"] ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest;
     request.onreadystatechange = function () {
         if (request.readyState == 4) {
             request.onreadystatechange = doNothing;
