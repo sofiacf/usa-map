@@ -1,4 +1,4 @@
-var map, courier = null, n, infowindow, service;
+var map, courier = null, n, infowindow;
 
 function initMap() {
     var mapOptions = {
@@ -11,28 +11,34 @@ function initMap() {
     };
     map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
+    //initialize google maps javascript api services
     var directionsService = new google.maps.DirectionsService();
     var directionsDisplay = new google.maps.DirectionsRenderer();
     directionsDisplay.setMap(map);
-    service = new google.maps.places.PlacesService(map);
     infowindow = new google.maps.InfoWindow();
 
+    //setup control elements
     var quoteForm = document.getElementById("quote-form");
     var dispatchPanel = document.getElementById("dispatch-panel");
     dispatchPanel.style.display = "none";
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(quoteForm);
     map.controls[google.maps.ControlPosition.LEFT_TOP].push(dispatchPanel);
     
+    //main event listener (runs when job information updates)
     var onChangeHandler = function () {
         if (!document.getElementById("d-input")["value"]) return;
         dispatchPanel.style.display = "block";
         var job = new Delivery();
         job.showRouteAndQuote(directionsService, directionsDisplay);
     }
+    quoteForm.addEventListener("change", onChangeHandler);
+    dispatchPanel.addEventListener("change", onChangeHandler);
 
-    var preferredIcon = "images/preferred.png";
-    var otherIcon = "images/other.png";
-    downloadUrl("https://smcf.nfshost.com/map/scripts/getcouriers.php", function (data) {
+    //load couriers from database and add as map to markers
+    var url = "https://smcf.nfshost.com/map/scripts/getcouriers.php";
+    downloadUrl(url, function (data) {
+        var preferredIcon = "images/preferred.png";
+        var otherIcon = "images/other.png";
         var xml = data.responseXML;
         var markers = xml.documentElement.getElementsByTagName("marker");
         Array.prototype.forEach.call(markers, function (e) {
@@ -83,19 +89,12 @@ function initMap() {
             addMarker();
         });
     });
-    quoteForm.addEventListener("change", onChangeHandler);
-    dispatchPanel.addEventListener("change", onChangeHandler);
 }
 function getChecked(field) {
     return document.getElementById(field)["checked"];
 }
 
 class Delivery {
-    static types = {
-        DIRECT: 'setjob-direct',
-        HOLD: 'setjob-hold',
-        ROUNDTRIP: 'setjob-rt'
-    };
     pick = document.getElementById("p-input")["value"];
     drop = document.getElementById("d-input")["value"];
     rate = document.getElementById("rate")["value"];
@@ -143,15 +142,14 @@ class Delivery {
 }
 
 function downloadUrl(url, callback) {
-    var request = window["ActiveXObject"] ? new ActiveXObject("Microsoft.XMLHTTP") : new XMLHttpRequest;
+    var request = window["ActiveXObject"] ? new ActiveXObject("Microsoft.XMLHTTP")
+    : new XMLHttpRequest;
     request.onreadystatechange = function () {
         if (request.readyState == 4) {
-            request.onreadystatechange = doNothing;
+            request.onreadystatechange = {};
             callback(request, request.status);
         }
     };
     request.open("GET", url, true);
     request.send(null);
 }
-
-function doNothing() {}
