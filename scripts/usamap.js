@@ -34,8 +34,9 @@ function initMap() {
                 marker = new google.maps.Marker({
                     map: map,
                     position: point,
-                    icon: ico,
-                    // label: name
+                    icon: {
+                        url: (grade > 3) ? preferredIcon : otherIcon
+                    }
                 });
                 marker.addListener("click", function () {
                     infowindow.setContent(`<div>${name}<br>${phone}<br></div>`);
@@ -54,6 +55,7 @@ function initMap() {
             var lng = parseFloat(e.getAttribute("lng"));
             if (lat < 1 || lng > -1) return;
             var point = new google.maps.LatLng(lat, lng);
+            var grade = parseInt(e.getAttribute("grade"));
 
             var name = e.getAttribute("name");
             var account = e.getAttribute("account"),
@@ -65,17 +67,13 @@ function initMap() {
                 email = e.getAttribute("email"),
                 contact = e.getAttribute("contact"),
                 notes = e.getAttribute("notes"),
-                grade = parseInt(e.getAttribute("grade")),
                 vehicles = e.getAttribute("vehicles"),
                 usa = e.getAttribute("usa"),
                 iac = e.getAttribute("iac"),
                 hm = e.getAttribute("hm"),
                 tsa = e.getAttribute("tsa"),
                 nfo = e.getAttribute("nfo"),
-                marker,
-                ico = {
-                    url: (grade > 3) ? preferredIcon : otherIcon
-                };
+                marker;
             addMarker();
         });
     });
@@ -98,38 +96,29 @@ function Delivery() {
         var pick = document.getElementById("p-input").value;
         var drop = document.getElementById("d-input").value;
 
-        var origin = courier || pick;
-        var dest = (rt) ? pick : drop;
+        var request = {
+            origin: courier || pick,
+            destination: (rt) ? pick : drop,
+            travelMode: "DRIVING"
+        }
 
-        if (!courier && rt) {
-            waypoints = [{
-                "location": drop,
-                "stopover": true
-            }];
-            return {
-                origin: origin,
-                waypoints: waypoints,
-                destination: dest,
-                travelMode: "DRIVING"
-            };
-        } else if (!courier) {
-            return {
-                origin: origin,
-                destination: dest,
-                travelMode: "DRIVING"
-            };
+        if (!courier) {
+            if (!rt) return request;
+            else {
+                request.waypoints = [{
+                    "location": drop,
+                    "stopover": true
+                }];
+                return request;
+            }
         }
         var waypoints = direct ? [pick] : hold ? [pick, courier] : [pick, drop];
         for (var i = 0; i < waypoints.length; i++) waypoints[i] = {
             "location": waypoints[i],
             "stopover": true
         };
-        return {
-            origin: origin,
-            destination: dest,
-            travelMode: "DRIVING",
-            waypoints: waypoints
-        };
+        request.waypoints = waypoints;
+        return request;
     }
 
     function getQuote(mi, permile) {
