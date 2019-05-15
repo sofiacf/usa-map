@@ -38,7 +38,7 @@ function initMap() {
                     // label: name
                 });
                 marker.addListener("click", function () {
-                    infowindow.setContent(`<div><p>${name}</p><p>${phone}</p></div>`);
+                    infowindow.setContent(`<div>${name}<br>${phone}<br></div>`);
                     infowindow.setOptions({
                         pixelOffset: new google.maps.Size(0, -30)
                     });
@@ -89,22 +89,24 @@ function initMap() {
 
 function Delivery() {
     function getRequest() {
-        var origin, r, w, dest,
-            p = document.getElementById("p-input").value,
-            d = document.getElementById("d-input").value,
-            direct = document.getElementById("setjobtype-direct"),
-            hold = document.getElementById("setjobtype-hold"),
-            rt = document.getElementById("setjobtype-rt").checked;
-        origin = courier || p;
-        dest = (rt) ? p : d;
+        var direct = document.getElementById("setjobtype-direct").checked;
+        var hold = document.getElementById("setjobtype-hold").checked;
+        var rt = document.getElementById("setjobtype-rt").checked;
+
+        var pick = document.getElementById("p-input").value;
+        var drop = document.getElementById("d-input").value;
+
+        var origin = courier || pick;
+        var dest = (rt) ? pick : drop;
+
         if (!courier && rt) {
-            w = [{
-                "location": d,
+            waypoints = [{
+                "location": drop,
                 "stopover": true
             }];
             return {
                 origin: origin,
-                waypoints: w,
+                waypoints: waypoints,
                 destination: dest,
                 travelMode: "DRIVING"
             };
@@ -115,22 +117,22 @@ function Delivery() {
                 travelMode: "DRIVING"
             };
         }
-        w = direct.checked ? [p] : hold.checked ? [p, courier] : [p, d];
-        for (var i = 0; i < w.length; i++) w[i] = {
-            "location": w[i],
+        var waypoints = direct ? [pick] : hold ? [pick, courier] : [pick, drop];
+        for (var i = 0; i < waypoints.length; i++) waypoints[i] = {
+            "location": waypoints[i],
             "stopover": true
         };
         return {
             origin: origin,
             destination: dest,
             travelMode: "DRIVING",
-            waypoints: w
+            waypoints: waypoints
         };
     }
 
     function getQuote(mi, permile) {
-        var base = parseInt(document.getElementById("rate").value),
-            add = parseInt(document.getElementById("add").value);
+        var base = parseInt(document.getElementById("rate").value);
+        var add = parseInt(document.getElementById("add").value);
         return (mi > 15) ? (mi - 15) * permile + base + add : base + add;
     }
     var request = getRequest();
