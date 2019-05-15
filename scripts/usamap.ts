@@ -1,7 +1,5 @@
 var map, courier = null, n, infowindow, service;
 
-document.getElementById("dispatch-panel").style.display = "none";
-
 function initMap() {
     var mapOptions = {
         mapTypeControl: false,
@@ -21,7 +19,9 @@ function initMap() {
 
     var quoteForm = document.getElementById("quote-form");
     var dispatchPanel = document.getElementById("dispatch-panel");
-    map.controls[google.maps.ControlPosition.LEFT_TOP].push(quoteForm, dispatchPanel);
+    dispatchPanel.style.display = "none";
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(quoteForm);
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(dispatchPanel);
     
     var onChangeHandler = function () {
         if (!document.getElementById("d-input")["value"]) return;
@@ -86,41 +86,28 @@ function initMap() {
     quoteForm.addEventListener("change", onChangeHandler);
     dispatchPanel.addEventListener("change", onChangeHandler);
 }
+function getChecked(field) {
+    return document.getElementById(field)["checked"];
+}
 
-function Delivery() {
-    function getJobType(types){
-        for (let type in types){
-            if (document.getElementById(types[type])["checked"]) return type;
-        }
-    }
-    function getPickup(){
-        return document.getElementById("p-input")["value"];
-    }
-    function getDrop(){
-        return document.getElementById("d-input")["value"];
-    }
-    function getRequest(pick, drop) {
-        var jobTypes = {
-            DIRECT: 'setjob-direct',
-            HOLD: 'setjob-hold',
-            ROUNDTRIP: 'setjob-rt'
-        }
-        var jobType = getJobType(jobTypes);
-        var stops = [pick];
-        var end = drop;
-        switch (jobType) {
-            case jobTypes.ROUNDTRIP:
-                if (courier) stops.push(drop);
-                else stops = [drop];
-                end = pick;
-                break;
-            case jobTypes.HOLD:
-                if (courier) stops.push(courier);
-                break;
-        }
+class Delivery {
+    static types = {
+        DIRECT: 'setjob-direct',
+        HOLD: 'setjob-hold',
+        ROUNDTRIP: 'setjob-rt'
+    };
+    pick = document.getElementById("p-input")["value"];
+    drop = document.getElementById("d-input")["value"];
+    rate = document.getElementById("rate")["value"];
+    charges = document.getElementById("add")["value"];
+    getRequest = () => {
+        var stops = [this.pick], end, jobType;
+        var rt = getChecked('setjob-rt');
+        if (rt) stops.push(this.drop);
+        else if (getChecked('setjob-hold') && courier) stops.push(courier);
         var request = {
             origin: courier || stops.shift(),
-            destination: end,
+            destination: rt ? this.pick : this.drop,
             travelMode: "DRIVING"
         }
         if (stops.length) {
@@ -129,24 +116,25 @@ function Delivery() {
         }
         return request;
     }
-
-    function getQuote(mi, permile) {
-        var rate = <HTMLInputElement>document.getElementById("rate");
-        var charges = <HTMLInputElement>document.getElementById("add");
-        var base = parseInt(rate.value);
-        var add = parseInt(charges.value);
-        return (mi > 15) ? (mi - 15) * permile + base + add : base + add;
+    getQuote = (mi, permile) => {
+        var base = parseInt(this.rate);
+        var add = parseInt(this.charges);
+        var mileage = mi > 15 ? (mi - 15) * permile : 0;
+        return add + base + mileage;
     }
-    var request = getRequest(getPickup(), getDrop());
-    this.showRouteAndQuote = function (directionsService, directionsDisplay) {
+    showRouteAndQuote = (directionsService, directionsDisplay) => {
+        var request = this.getRequest();
+        var getQuote = this.getQuote;
         directionsService.route(request, function (result, status) {
             if (status !== "OK") return;
             directionsDisplay.setDirections(result);
-            var mi = 0,
-                legs = result.routes[0].legs;
-            for (var i = 0; i < legs.length; i++) mi += Math.floor(legs[i].distance.value * 0.0006213712);
-            var quote = getQuote(mi, 2.25),
-                higherQuote = getQuote(mi, 3);
+            var mi = 0;
+            var legs = result.routes[0].legs;
+            for (var i = 0; i < legs.length; i++) {
+                mi += Math.floor(legs[i].distance.value * 0.0006213712);
+            }
+            var quote = getQuote(mi, 2.25);
+            var higherQuote = getQuote(mi, 3);
             document.getElementById("mileage").innerHTML = mi + " mi";
             document.getElementById("quote").innerHTML = "$" + quote;
             document.getElementById("$3-quote").innerHTML = "$" + higherQuote;
