@@ -1,10 +1,4 @@
 {
-    "devDependencies": {
-        "jest": "^24.8.0"
-    },
-    "scripts": {
-        "test": "jest"
-    },
     "dependencies": {
         "@types/googlemaps": "^3.30.20"
     }
